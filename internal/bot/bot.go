@@ -17,7 +17,7 @@ func BotLoop() {
 
 		for k := range mentions {
 			mention := mentions[len(mentions)-1-k]
-			handleMention(mention, accessToken)
+			handleMention(mention, instanceURL, accessToken)
 			viper.Set("last_mention_id", mention.ID)
 			viper.WriteConfig()
 		}

@@ -53,15 +53,14 @@ func GetMentions(instanceURL, accessToken string) []Mention {
 
 	_, err = resty.New().R().
 		SetAuthToken(accessToken).
-		SetQueryParams(map[string]string{
+		SetFormData(map[string]string{
 			"exclude_types": "follow favourite reblog poll follow_request",
-			"min_id":        lastID,
 		}).
+		SetQueryParam("min_id", lastID).
 		SetResult(&mentions).
 		Get(url.String())
 	if err != nil {
 		panic(err)
 	}
-
 	return mentions
 }

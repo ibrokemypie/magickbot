@@ -16,7 +16,9 @@ Run `magickbot`, first time running will prompt for oauth authentication for you
 
 ### Commands
 
-None
+explode
+
+implode
 
 ### Sample config
 
