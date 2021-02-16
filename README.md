@@ -16,3 +16,21 @@ instance:
     access_token: xxxxxxxxxxxxxxxxxxxxxxx
     visibility: public
 ```
+
+### Todo
+
+- Media download
+
+- Media upload
+
+- Magick commands
+
+- Command blacklist
+
+- Command whitelist
+
+- User whitelist
+
+- User blacklist
+
+- Local instance only mode
