@@ -44,3 +44,7 @@ instance:
 - User blacklist
 
 - Local instance only mode
+
+- Command list
+
+- Apply to reply
