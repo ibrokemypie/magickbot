@@ -2,9 +2,19 @@
 
 A bot to allow users to run fun imagemagick commands on images from the fediverse.
 
+## Installation
+
+`go get -u github.com/ibrokemypie/magickbot/cmd/magickbot`
+
+Binary will be installed to your `GOPATH` (likely $HOME/go/bin).
+
+## Usage
+
+Run `magickbot`, first time running will prompt for oauth authentication for your bot user and instance.
+
 ### Commands
 
-empty
+None
 
 ### Sample config
 
