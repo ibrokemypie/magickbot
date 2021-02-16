@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/spf13/viper"
 )
 
 // Account - Mastodon account object
@@ -47,12 +48,14 @@ func GetMentions(instanceURL, accessToken string) []Mention {
 		panic(err)
 	}
 
+	lastID := viper.GetString("last_mention_id")
 	mentions := make([]Mention, 0)
 
 	_, err = resty.New().R().
 		SetAuthToken(accessToken).
-		SetFormData(map[string]string{
+		SetQueryParams(map[string]string{
 			"exclude_types": "follow favourite reblog poll follow_request",
+			"min_id":        lastID,
 		}).
 		SetResult(&mentions).
 		Get(url.String())

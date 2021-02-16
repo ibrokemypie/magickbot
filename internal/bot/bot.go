@@ -15,8 +15,11 @@ func BotLoop() {
 	for range time.Tick(time.Second * 5) {
 		mentions := fedi.GetMentions(instanceURL, accessToken)
 
-		for _, mention := range mentions {
+		for k := range mentions {
+			mention := mentions[len(mentions)-1-k]
 			handleMention(mention, accessToken)
+			viper.Set("last_mention_id", mention.ID)
+			viper.WriteConfig()
 		}
 	}
 }
