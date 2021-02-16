@@ -14,7 +14,7 @@ func Implode(files []string, iterations int) {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
-	for i := 0; i <= iterations; i++ {
+	for i := 0; i < iterations; i++ {
 		for k, file := range files {
 			err := mw.ReadImage(file)
 			if err != nil {
@@ -49,7 +49,7 @@ func Explode(files []string, iterations int) {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
-	for i := 0; i <= iterations; i++ {
+	for i := 0; i < iterations; i++ {
 		for k, file := range files {
 			err := mw.ReadImage(file)
 			if err != nil {

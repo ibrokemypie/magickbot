@@ -1,7 +1,6 @@
 package fedi
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
@@ -41,8 +40,6 @@ type Mention struct {
 
 // GetMentions -
 func GetMentions(instanceURL, accessToken string) []Mention {
-	fmt.Println("Getting mentions")
-
 	url, err := url.Parse(instanceURL + "/api/v1/notifications")
 	if err != nil {
 		panic(err)

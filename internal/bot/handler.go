@@ -10,7 +10,18 @@ import (
 )
 
 func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
-	if len(mention.Status.MediaAttachments) != 0 {
+	var status fedi.Status
+
+	if mention.Status.MediaAttachments != nil && len(mention.Status.MediaAttachments) > 0 {
+		status = mention.Status
+	} else {
+		reply := fedi.GetStatus(mention.Status.ReplyToID, instanceURL, accessToken)
+		if reply.MediaAttachments != nil && len(reply.MediaAttachments) > 0 {
+			status = reply
+		}
+	}
+
+	if status.MediaAttachments != nil {
 		files := make([]string, 0)
 		p := bluemonday.StrictPolicy()
 		text := p.Sanitize(mention.Status.Content)
@@ -30,10 +41,10 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 				}
 
 				// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
-				for _, attachment := range mention.Status.MediaAttachments {
+				for _, attachment := range status.MediaAttachments {
 					files = append(files, fedi.GetMedia(attachment.URL, accessToken))
 					magick.Explode(files, i)
-					fedi.PostMedia(files, mention.Status.ID, instanceURL, accessToken)
+					fedi.PostMedia(files, status.ID, instanceURL, accessToken)
 				}
 				break Loop
 			case "implode":
@@ -47,12 +58,12 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 				}
 
 				// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
-				for _, attachment := range mention.Status.MediaAttachments {
+				for _, attachment := range status.MediaAttachments {
 					files = append(files, fedi.GetMedia(attachment.URL, accessToken))
 				}
 
 				magick.Implode(files, i)
-				fedi.PostMedia(files, mention.Status.ID, instanceURL, accessToken)
+				fedi.PostMedia(files, status.ID, instanceURL, accessToken)
 				break Loop
 			}
 		}

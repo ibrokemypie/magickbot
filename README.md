@@ -48,5 +48,3 @@ last_mention_id: xxxxxx
 - Local instance only mode
 
 - Command list
-
-- Apply to replies tagging the bot
