@@ -1,11 +1,10 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"net/url"
+
+	"github.com/go-resty/resty/v2"
 )
 
 type app struct {
@@ -33,41 +32,46 @@ func getApp(instanceURL string) app {
 	website := "https://github.com/ibrokemypie/magickbot"
 	redirectURI := "urn:ietf:wg:oauth:2.0:oob"
 
-	resp, err := http.PostForm(instanceURL+"/api/v1/apps",
-		url.Values{
-			"client_name":   {clientName},
-			"scopes":        {"read write"},
-			"website":       {website},
-			"redirect_uris": {redirectURI}})
+	url, err := url.Parse(instanceURL + "/api/v1/apps")
 	if err != nil {
 		panic(err)
 	}
 
-	defer resp.Body.Close()
-
 	var result app
 
-	json.NewDecoder(resp.Body).Decode(&result)
+	_, err = resty.New().R().
+		SetFormData(map[string]string{
+			"client_name":   clientName,
+			"scopes":        "read write",
+			"website":       website,
+			"redirect_uris": redirectURI,
+		}).
+		SetResult(&result).
+		Post(url.String())
+	if err != nil {
+		panic(err)
+	}
 
 	return result
 }
 
 func authorizeUser(instanceURL string, app app) string {
-	u, err := url.Parse(instanceURL + "/oauth/authorize")
+	url, err := url.Parse(instanceURL + "/oauth/authorize")
 	if err != nil {
 		panic(err)
 	}
-	q := u.Query()
+
+	q := url.Query()
 	q.Set("client_id", app.ClientID)
 	q.Set("redirect_uri", app.RedirectURI)
 	q.Set("response_type", "code")
 	q.Set("force_login", "true")
 	q.Set("scope", "read write")
-	u.RawQuery = q.Encode()
+	url.RawQuery = q.Encode()
 
 	fmt.Println("Please open the following URL in your browser.")
 	fmt.Println("Once you have authenticated, paste the token from the page into this window.")
-	fmt.Println(u)
+	fmt.Println(url)
 
 	var token string
 	fmt.Scanln(&token)
@@ -76,30 +80,29 @@ func authorizeUser(instanceURL string, app app) string {
 }
 
 func oauthToken(instanceURL string, app app, token string) string {
-	resp, err := http.PostForm(instanceURL+"/oauth/token",
-		url.Values{
-			"client_id":     {app.ClientID},
-			"client_secret": {app.ClientSecret},
-			"redirect_uri":  {app.RedirectURI},
-			"scope":         {"read write"},
-			"grant_type":    {"authorization_code"},
-			"code":          {token}})
+	url, err := url.Parse(instanceURL + "/oauth/token")
 	if err != nil {
 		panic(err)
 	}
-
-	defer resp.Body.Close()
 
 	var result map[string]interface{}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	_, err = resty.New().R().
+		SetFormData(map[string]string{
+			"client_id":     app.ClientID,
+			"client_secret": app.ClientSecret,
+			"redirect_uri":  app.RedirectURI,
+			"scope":         "read write",
+			"grant_type":    "authorization_code",
+			"code":          token,
+		}).
+		SetResult(&result).
+		Post(url.String())
 	if err != nil {
 		panic(err)
 	}
 
-	json.Unmarshal(body, &result)
 	if result["access_token"] == nil {
-		fmt.Println(string(body))
 		panic(result)
 	}
 
