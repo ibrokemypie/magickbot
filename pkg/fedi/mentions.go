@@ -27,6 +27,7 @@ type Status struct {
 	ID               string       `json:"id"`
 	ReplyToID        string       `json:"in_reply_to_id"`
 	Content          string       `json:"content"`
+	Text             string       `json:"text"`
 	MediaAttachments []Attachment `json:"media_attachments"`
 }
 

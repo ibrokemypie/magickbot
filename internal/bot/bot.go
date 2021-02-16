@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/ibrokemypie/magickbot/pkg/fedi"
@@ -17,9 +16,7 @@ func BotLoop() {
 		mentions := fedi.GetMentions(instanceURL, accessToken)
 
 		for _, mention := range mentions {
-			for _, media := range mention.Status.MediaAttachments {
-				fmt.Println(media.URL)
-			}
+			handleMention(mention, accessToken)
 		}
 	}
 }
