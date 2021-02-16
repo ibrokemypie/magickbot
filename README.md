@@ -33,11 +33,7 @@ instance:
 
 ### Todo
 
-- Media download
-
-- Media upload
-
-- Magick commands
+- More magick commands
 
 - Command blacklist
 
