@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -39,13 +40,11 @@ func PostMedia(files []string, replyToID, instanceURL, accessToken string) error
 			panic(err)
 		}
 
-		filename := "/tmp/out." + path.Base(file)
-
 		var result Media
 
 		_, err = resty.New().R().
 			SetAuthToken(accessToken).
-			SetFile("file", filename).
+			SetFile("file", file).
 			SetResult(&result).
 			Post(u.String())
 		if err != nil {
@@ -55,8 +54,8 @@ func PostMedia(files []string, replyToID, instanceURL, accessToken string) error
 
 		mediaIDs = append(mediaIDs, result.ID)
 
-		os.Remove("/tmp/" + path.Base(file))
-		os.Remove(filename)
+		os.Remove("/tmp/" + strings.TrimPrefix(file, "/tmp/out."))
+		os.Remove(file)
 	}
 
 	if len(mediaIDs) > 0 {

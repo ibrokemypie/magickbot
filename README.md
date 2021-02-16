@@ -16,9 +16,9 @@ Run `magickbot`, first time running will prompt for oauth authentication for you
 
 ### Commands
 
-explode
+explode [1-15]
 
-implode
+implode [1-15]
 
 ### Sample config
 
@@ -29,6 +29,8 @@ instance:
     instance_url: https://mastodon.social;
     access_token: xxxxxxxxxxxxxxxxxxxxxxx
     visibility: public
+
+last_mention_id: xxxxxx
 ```
 
 ### Todo
@@ -47,4 +49,4 @@ instance:
 
 - Command list
 
-- Apply to reply
+- Apply to replies tagging the bot
