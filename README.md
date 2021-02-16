@@ -8,6 +8,8 @@ A bot to allow users to run fun imagemagick commands on images from the fedivers
 
 Binary will be installed to your `GOPATH` (likely $HOME/go/bin).
 
+Depends on go with modules support and imagemagick v7+.
+
 ## Usage
 
 Run `magickbot`, first time running will prompt for oauth authentication for your bot user and instance.
