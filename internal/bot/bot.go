@@ -26,9 +26,9 @@ func BotLoop() {
 }
 
 // PostError - Helper function to post errors to fedi
-func PostError(err error, replyToID, instanceURL, accessToken string) {
+func PostError(err error, reply fedi.Status, instanceURL, accessToken string) {
 	log.Println(err)
-	err = fedi.PostStatus("Magickbot error: "+err.Error(), replyToID, instanceURL, accessToken)
+	err = fedi.PostStatus("Magickbot error: "+err.Error(), reply, instanceURL, accessToken)
 	if err != nil {
 		log.Println(err)
 	}

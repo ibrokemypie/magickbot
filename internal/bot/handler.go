@@ -21,7 +21,7 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 	} else {
 		reply, err := fedi.GetStatus(mention.Status.ReplyToID, instanceURL, accessToken)
 		if err != nil {
-			PostError(err, mention.Status.ID, instanceURL, accessToken)
+			PostError(err, mention.Status, instanceURL, accessToken)
 			return
 		}
 
@@ -81,15 +81,15 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 				log.Println(err)
 				err = magick.RunMagick(operation, files, iterations)
 				if err != nil {
-					PostError(err, mention.Status.ID, instanceURL, accessToken)
+					PostError(err, mention.Status, instanceURL, accessToken)
 					return
 				}
 			}
 
 			// Try to post the manipulated files
-			err = fedi.PostMedia(files, mention.Status.ID, instanceURL, accessToken)
+			err = fedi.PostMedia(files, mention.Status, instanceURL, accessToken)
 			if err != nil {
-				PostError(err, mention.Status.ID, instanceURL, accessToken)
+				PostError(err, mention.Status, instanceURL, accessToken)
 				return
 			}
 

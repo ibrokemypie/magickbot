@@ -2,6 +2,7 @@ package fedi
 
 import (
 	"net/url"
+	"strconv"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -14,6 +15,8 @@ type Status struct {
 	Text             string       `json:"text"`
 	MediaAttachments []Attachment `json:"media_attachments"`
 	Account          Account      `json:"account"`
+	Sensitive        bool         `json:"sensitive"`
+	Visibility       string       `json:"visibility"`
 }
 
 // GetStatus - Return a status object from an ID
@@ -37,7 +40,7 @@ func GetStatus(id, instanceURL, accessToken string) (Status, error) {
 }
 
 // PostStatus - Posts a text status
-func PostStatus(contents, replyToID, instanceURL, accessToken string) error {
+func PostStatus(contents string, reply Status, instanceURL, accessToken string) error {
 	u, err := url.Parse(instanceURL + "/api/v1/statuses")
 	if err != nil {
 		return (err)
@@ -46,8 +49,10 @@ func PostStatus(contents, replyToID, instanceURL, accessToken string) error {
 	_, err = resty.New().R().
 		SetAuthToken(accessToken).
 		SetFormData(map[string]string{
-			"in_reply_to_id": replyToID,
+			"in_reply_to_id": reply.ID,
 			"status":         contents,
+			"visibility":     reply.Visibility,
+			"sensitive":      strconv.FormatBool(reply.Sensitive),
 		}).
 		Post(u.String())
 	if err != nil {

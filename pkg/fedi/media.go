@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
@@ -33,7 +34,7 @@ func GetMedia(mediaURL string, accessToken string) string {
 }
 
 // PostMedia - Upload files and create a new status
-func PostMedia(files []string, replyToID, instanceURL, accessToken string) error {
+func PostMedia(files []string, reply Status, instanceURL, accessToken string) error {
 
 	var mediaIDs = make([]string, 0)
 
@@ -55,9 +56,6 @@ func PostMedia(files []string, replyToID, instanceURL, accessToken string) error
 		}
 
 		mediaIDs = append(mediaIDs, result.ID)
-
-		os.Remove("/tmp/" + strings.TrimPrefix(file, "/tmp/out."))
-		os.Remove(file)
 	}
 
 	if len(mediaIDs) > 0 {
@@ -69,12 +67,19 @@ func PostMedia(files []string, replyToID, instanceURL, accessToken string) error
 		_, err = resty.New().R().
 			SetAuthToken(accessToken).
 			SetFormDataFromValues(url.Values{
-				"in_reply_to_id": []string{replyToID},
+				"in_reply_to_id": []string{reply.ID},
+				"visibility":     []string{reply.Visibility},
+				"sensitive":      []string{strconv.FormatBool(reply.Sensitive)},
 				"media_ids[]":    mediaIDs,
 			}).
 			Post(u.String())
 		if err != nil {
 			return (err)
+		}
+
+		for _, file := range files {
+			os.Remove("/tmp/" + strings.TrimPrefix(file, "/tmp/out."))
+			os.Remove(file)
 		}
 
 	}
