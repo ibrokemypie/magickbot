@@ -2,6 +2,7 @@ package magick
 
 import (
 	"errors"
+	"math"
 	"path"
 
 	"github.com/spf13/viper"
@@ -23,6 +24,9 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
+	maxPixels := uint(viper.GetInt("max_pixels"))
+	maxSide := uint(math.Sqrt(float64(maxPixels)))
+
 	// run specified iterations of operations  for each file
 	for k, file := range files {
 		err := mw.ReadImage(file)
@@ -33,11 +37,9 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 		height := mw.GetImageHeight()
 		width := mw.GetImageWidth()
 
-		maxPixels := uint(viper.GetInt("max_pixels"))
-
 		// If the image has more than maxPixels pixels, resize it down to fit. This is to reduce the maximum utilisation from a single operation.
 		if width*height > maxPixels {
-			mw.ResizeImage(maxPixels/2, maxPixels/2, imagick.FILTER_UNDEFINED)
+			mw.ResizeImage(maxSide, maxSide, imagick.FILTER_UNDEFINED)
 			if err != nil {
 				return (err)
 			}
