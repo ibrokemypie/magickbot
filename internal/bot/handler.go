@@ -21,6 +21,12 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 
 	maxIterations := viper.GetInt("max_iterations")
 
+	self, err := fedi.GetCurrentUser(instanceURL, accessToken)
+	if err != nil {
+		PostError(err, mention.Status, instanceURL, accessToken)
+		return
+	}
+
 	// If mentioning status has no images and reply exists, use reply
 	if (mention.Status.MediaAttachments != nil || len(mention.Status.MediaAttachments) > 0) && mention.Status.ReplyToID != "" {
 		reply, err := fedi.GetStatus(mention.Status.ReplyToID, instanceURL, accessToken)
@@ -34,12 +40,6 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 		}
 		// otherwise apply to the profile pictures of tagged users
 	} else if len(mention.Status.Mentions) > 1 {
-		self, err := fedi.GetCurrentUser(instanceURL, accessToken)
-		if err != nil {
-			PostError(err, mention.Status, instanceURL, accessToken)
-			return
-		}
-
 		// add the profile pics of non self mentioned users as attachments to the status
 		for _, m := range mention.Status.Mentions {
 			if m.ID != self.ID {
@@ -112,6 +112,18 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 			}
 
 			content := strings.Builder{}
+			for _, m := range mention.Status.Mentions {
+				if m.ID != self.ID {
+					content.WriteString("@")
+					content.WriteString(m.Acct)
+					content.WriteString(", ")
+				}
+			}
+
+			content.WriteString("@")
+			content.WriteString(mention.Status.Account.Acct)
+			content.WriteString("\n")
+
 			content.WriteString("Ran ")
 			content.WriteString(strconv.Itoa(iterations))
 			content.WriteString(" iteration(s) of ")
