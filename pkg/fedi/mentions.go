@@ -1,6 +1,7 @@
 package fedi
 
 import (
+	"log"
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
@@ -57,7 +58,7 @@ func GetMentions(instanceURL, accessToken string) []Mention {
 		SetResult(&mentions).
 		Get(url.String())
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	return mentions
 }

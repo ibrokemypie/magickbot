@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"log"
 	"strconv"
 	"strings"
 
@@ -11,13 +12,18 @@ import (
 
 func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 	var status fedi.Status
-	var operation func([]string, int)
+	var operation func([]string, int) error
 	var iterations = 1
 
 	if mention.Status.MediaAttachments != nil && len(mention.Status.MediaAttachments) > 0 {
 		status = mention.Status
 	} else {
-		reply := fedi.GetStatus(mention.Status.ReplyToID, instanceURL, accessToken)
+		reply, err := fedi.GetStatus(mention.Status.ReplyToID, instanceURL, accessToken)
+		if err != nil {
+			PostError(err, mention.Status.ID, instanceURL, accessToken)
+			return
+		}
+
 		if reply.MediaAttachments != nil && len(reply.MediaAttachments) > 0 {
 			status = reply
 		}
@@ -51,8 +57,22 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 				// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
 				for _, attachment := range status.MediaAttachments {
 					files = append(files, fedi.GetMedia(attachment.URL, accessToken))
-					operation(files, iterations)
-					fedi.PostMedia(files, mention.Status.ID, instanceURL, accessToken)
+					err := operation(files, iterations)
+					// retry once
+					if err != nil {
+						log.Println(err)
+						err = operation(files, iterations)
+						if err != nil {
+							PostError(err, mention.Status.ID, instanceURL, accessToken)
+							return
+						}
+					}
+
+					err = fedi.PostMedia(files, mention.Status.ID, instanceURL, accessToken)
+					if err != nil {
+						PostError(err, mention.Status.ID, instanceURL, accessToken)
+						return
+					}
 				}
 				break Loop
 			}

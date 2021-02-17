@@ -1,13 +1,12 @@
 package magick
 
 import (
-	"fmt"
 	"path"
 
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
-func Implode(files []string, iterations int) {
+func Implode(files []string, iterations int) error {
 	imagick.Initialize()
 	defer imagick.Terminate()
 
@@ -18,12 +17,12 @@ func Implode(files []string, iterations int) {
 		for k, file := range files {
 			err := mw.ReadImage(file)
 			if err != nil {
-				panic(err)
+				return (err)
 			}
 
 			err = mw.ImplodeImage(.5, imagick.INTERPOLATE_PIXEL_UNDEFINED)
 			if err != nil {
-				panic(err)
+				return (err)
 			}
 
 			outputFile := file
@@ -34,15 +33,14 @@ func Implode(files []string, iterations int) {
 
 			err = mw.WriteImage(outputFile)
 			if err != nil {
-				panic(err)
+				return (err)
 			}
-
-			fmt.Println("imploded image " + outputFile)
 		}
 	}
+	return nil
 }
 
-func Explode(files []string, iterations int) {
+func Explode(files []string, iterations int) error {
 	imagick.Initialize()
 	defer imagick.Terminate()
 
@@ -53,12 +51,12 @@ func Explode(files []string, iterations int) {
 		for k, file := range files {
 			err := mw.ReadImage(file)
 			if err != nil {
-				panic(err)
+				return (err)
 			}
 
 			err = mw.ImplodeImage(-.5, imagick.INTERPOLATE_PIXEL_UNDEFINED)
 			if err != nil {
-				panic(err)
+				return (err)
 			}
 
 			outputFile := file
@@ -69,10 +67,9 @@ func Explode(files []string, iterations int) {
 
 			err = mw.WriteImage(outputFile)
 			if err != nil {
-				panic(err)
+				return (err)
 			}
-
-			fmt.Println("exploded image " + outputFile)
 		}
 	}
+	return nil
 }
