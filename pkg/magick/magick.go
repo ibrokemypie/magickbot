@@ -12,6 +12,7 @@ type MagickCommand int
 const (
 	EXPLODE = iota + 1
 	IMPLODE
+	MAGIK
 )
 
 func RunMagick(command MagickCommand, files []string, iterations int) error {
@@ -39,6 +40,20 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 			case IMPLODE:
 				{
 					err = mw.ImplodeImage(.5, imagick.INTERPOLATE_PIXEL_UNDEFINED)
+					if err != nil {
+						return (err)
+					}
+				}
+			case MAGIK:
+				{
+					width := mw.GetImageWidth()
+					height := mw.GetImageHeight()
+
+					err = mw.LiquidRescaleImage(width/2, height/2, 1, 0)
+					if err != nil {
+						return (err)
+					}
+					err = mw.LiquidRescaleImage(uint(float32(width)*1.5), uint(float32(height)*1.5), 2, 0)
 					if err != nil {
 						return (err)
 					}

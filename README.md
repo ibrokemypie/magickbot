@@ -4,7 +4,7 @@ A bot to allow users to run fun imagemagick commands on images from the fedivers
 
 ## Installation
 
-`go get -u github.com/ibrokemypie/magickbot/cmd/magickbot`
+`GO111MODULE=on go get -u github.com/ibrokemypie/magickbot/cmd/magickbot`
 
 Binary will be installed to your `GOPATH` (likely $HOME/go/bin).
 
@@ -16,11 +16,15 @@ Run `magickbot`, first time running will prompt for oauth authentication for you
 
 Tag the bot either in a status containing media, a reply to a status containing media, or a reply to a status with no media to apply to the user's avatar. Include the command (eg. explode) in your status, optionally including the desired number of iterations (currently limited to 1 to 15 inclusive)
 
+`command [1-15]`
+
 ### Commands
 
-explode [1-15]
+explode
 
-implode [1-15]
+implode
+
+magik
 
 ### Sample config
 
