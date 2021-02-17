@@ -25,7 +25,6 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 	defer mw.Destroy()
 
 	maxPixels := uint(viper.GetInt("max_pixels"))
-	maxSide := uint(math.Sqrt(float64(maxPixels)))
 
 	// run specified iterations of operations  for each file
 	for k, file := range files {
@@ -39,7 +38,12 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 
 		// If the image has more than maxPixels pixels, resize it down to fit. This is to reduce the maximum utilisation from a single operation.
 		if width*height > maxPixels {
-			mw.ResizeImage(maxSide, maxSide, imagick.FILTER_UNDEFINED)
+
+			ratio := float64(width) / float64(height)
+			newHeight := math.Sqrt(float64(maxPixels) / ratio)
+			newWidth := float64(maxPixels) / newHeight
+
+			mw.ResizeImage(uint(newWidth), uint(newWidth), imagick.FILTER_UNDEFINED)
 			if err != nil {
 				return (err)
 			}
