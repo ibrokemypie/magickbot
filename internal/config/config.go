@@ -16,6 +16,7 @@ func LoadConfig() {
 	viper.AddConfigPath(".")
 
 	viper.SetDefault("max_pixels", 640000)
+	viper.SetDefault("max_iterations", 15)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

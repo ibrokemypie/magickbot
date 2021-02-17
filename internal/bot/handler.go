@@ -8,6 +8,7 @@ import (
 	"github.com/ibrokemypie/magickbot/pkg/fedi"
 	"github.com/ibrokemypie/magickbot/pkg/magick"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/spf13/viper"
 )
 
 func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
@@ -15,6 +16,8 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 	var operation magick.MagickCommand
 	var iterations = 1
 	var providedMedia = false
+
+	maxIterations := viper.GetInt("max_iterations")
 
 	if mention.Status.MediaAttachments != nil && len(mention.Status.MediaAttachments) > 0 {
 		status = mention.Status
@@ -58,7 +61,7 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 				// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
 				if len(textSplit) > k+1 {
 					j, err := strconv.Atoi(textSplit[k+1])
-					if err == nil && iterations > 0 && iterations <= 15 {
+					if err == nil && iterations > 0 && iterations <= maxIterations {
 						iterations = j
 					}
 				}

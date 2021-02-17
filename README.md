@@ -14,9 +14,9 @@ Depends on go with modules support and imagemagick v7+.
 
 Run `magickbot`, first time running will prompt for oauth authentication for your bot user and instance.
 
-Tag the bot either in a status containing media, a reply to a status containing media, or a reply to a status with no media to apply to the user's avatar. Include the command (eg. explode) in your status, optionally including the desired number of iterations (currently limited to 1 to 15 inclusive)
+Tag the bot either in a status containing media, a reply to a status containing media, or a reply to a status with no media to apply to the user's avatar. Include the command (eg. explode) in your status, optionally including the desired number of iterations (between 1 and `max_iterations` inclusive)
 
-`command [1-15]`
+`command [1-max_iterations]`
 
 ### Commands
 
@@ -37,6 +37,7 @@ instance:
 
 last_mention_id: xxxxxx
 max_pixels: 640000
+max_iterations: 15
 ```
 
 ### Todo
