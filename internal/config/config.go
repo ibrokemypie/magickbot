@@ -15,7 +15,7 @@ func LoadConfig() {
 	viper.AddConfigPath("$HOME/.config/magickbot")
 	viper.AddConfigPath(".")
 
-	viper.SetDefault("instance.visibility", "public")
+	viper.SetDefault("max_pixels", 640000)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -51,7 +51,7 @@ func LoadConfig() {
 
 		viper.Set("instance.instance_url", instanceURL)
 		viper.Set("instance.access_token", accessToken)
-
-		viper.WriteConfig()
 	}
+
+	viper.WriteConfig()
 }

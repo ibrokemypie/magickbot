@@ -34,9 +34,9 @@ magik
 instance:
     instance_url: https://mastodon.social;
     access_token: xxxxxxxxxxxxxxxxxxxxxxx
-    visibility: public
 
 last_mention_id: xxxxxx
+max_pixels: 640000
 ```
 
 ### Todo
@@ -45,11 +45,7 @@ last_mention_id: xxxxxx
 
 - Command blacklist
 
-- Command whitelist
-
 - User whitelist
-
-- User blacklist
 
 - Local instance only mode
 

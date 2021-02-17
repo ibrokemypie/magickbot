@@ -4,6 +4,7 @@ import (
 	"errors"
 	"path"
 
+	"github.com/spf13/viper"
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
@@ -22,12 +23,30 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
+	// run specified iterations of operations  for each file
 	for k, file := range files {
 		err := mw.ReadImage(file)
 		if err != nil {
 			return (err)
 		}
 
+		height := mw.GetImageHeight()
+		width := mw.GetImageWidth()
+
+		maxPixels := uint(viper.GetInt("max_pixels"))
+
+		// If the image has more than maxPixels pixels, resize it down to fit. This is to reduce the maximum utilisation from a single operation.
+		if width*height > maxPixels {
+			mw.ResizeImage(maxPixels/2, maxPixels/2, imagick.FILTER_UNDEFINED)
+			if err != nil {
+				return (err)
+			}
+
+			height = mw.GetImageHeight()
+			width = mw.GetImageWidth()
+		}
+
+		//  Run the magick operation iterations number of times
 		for i := 0; i < iterations; i++ {
 			switch command {
 			case EXPLODE:
@@ -46,10 +65,7 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 				}
 			case MAGIK:
 				{
-					width := mw.GetImageWidth()
-					height := mw.GetImageHeight()
-
-					err = mw.LiquidRescaleImage(width/2, height/2, 1, 0)
+					err = mw.LiquidRescaleImage(uint(width/2), uint(height/2), 1, 0)
 					if err != nil {
 						return (err)
 					}
