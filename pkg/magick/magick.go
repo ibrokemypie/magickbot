@@ -22,13 +22,13 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
-	for i := 0; i < iterations; i++ {
-		for k, file := range files {
-			err := mw.ReadImage(file)
-			if err != nil {
-				return (err)
-			}
+	for k, file := range files {
+		err := mw.ReadImage(file)
+		if err != nil {
+			return (err)
+		}
 
+		for i := 0; i < iterations; i++ {
 			switch command {
 			case EXPLODE:
 				{
@@ -63,18 +63,16 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 					return errors.New("Unsupported command")
 				}
 			}
+		}
 
-			outputFile := file
-			if i == 0 {
-				outputFile = "/tmp/out." + path.Base(file)
-				files[k] = outputFile
-			}
+		outputFile := "/tmp/out." + path.Base(file)
+		files[k] = outputFile
 
-			err = mw.WriteImage(outputFile)
-			if err != nil {
-				return (err)
-			}
+		err = mw.WriteImage(outputFile)
+		if err != nil {
+			return (err)
 		}
 	}
+
 	return nil
 }

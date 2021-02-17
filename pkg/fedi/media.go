@@ -82,7 +82,6 @@ func PostMedia(content string, files []string, reply Status, instanceURL, access
 			os.Remove("/tmp/" + strings.TrimPrefix(file, "/tmp/out."))
 			os.Remove(file)
 		}
-
 	}
 
 	return nil
