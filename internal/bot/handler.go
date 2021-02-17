@@ -11,6 +11,8 @@ import (
 
 func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 	var status fedi.Status
+	var operation func([]string, int)
+	var iterations = 1
 
 	if mention.Status.MediaAttachments != nil && len(mention.Status.MediaAttachments) > 0 {
 		status = mention.Status
@@ -27,43 +29,31 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 		text := p.Sanitize(mention.Status.Content)
 
 		textSplit := strings.Split(text, " ")
+
 	Loop:
 		for k, v := range textSplit {
 			switch v {
 			case "explode":
-				// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
-				i := 1
-				if len(textSplit) > k+1 {
-					j, err := strconv.Atoi(textSplit[k+1])
-					if err == nil && i > 0 && i <= 15 {
-						i = j
-					}
-				}
-
-				// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
-				for _, attachment := range status.MediaAttachments {
-					files = append(files, fedi.GetMedia(attachment.URL, accessToken))
-					magick.Explode(files, i)
-					fedi.PostMedia(files, status.ID, instanceURL, accessToken)
-				}
-				break Loop
+				operation = magick.Explode
 			case "implode":
+				operation = magick.Implode
+			}
+
+			if operation != nil {
 				// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
-				i := 1
 				if len(textSplit) > k+1 {
 					j, err := strconv.Atoi(textSplit[k+1])
-					if err == nil && i > 0 && i <= 15 {
-						i = j
+					if err == nil && iterations > 0 && iterations <= 15 {
+						iterations = j
 					}
 				}
 
 				// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
 				for _, attachment := range status.MediaAttachments {
 					files = append(files, fedi.GetMedia(attachment.URL, accessToken))
+					operation(files, iterations)
+					fedi.PostMedia(files, mention.Status.ID, instanceURL, accessToken)
 				}
-
-				magick.Implode(files, i)
-				fedi.PostMedia(files, status.ID, instanceURL, accessToken)
 				break Loop
 			}
 		}
