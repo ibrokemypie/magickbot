@@ -17,6 +17,7 @@ type Status struct {
 	Account          Account      `json:"account"`
 	Sensitive        bool         `json:"sensitive"`
 	Visibility       string       `json:"visibility"`
+	Mentions         []Account    `json:"mentions"`
 }
 
 // GetStatus - Return a status object from an ID

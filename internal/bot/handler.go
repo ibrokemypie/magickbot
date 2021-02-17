@@ -11,17 +11,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
+func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 	var status fedi.Status
 	var operation magick.MagickCommand
 	var iterations = 1
 	var providedMedia = false
 
+	status = mention.Status
+
 	maxIterations := viper.GetInt("max_iterations")
 
-	if mention.Status.MediaAttachments != nil && len(mention.Status.MediaAttachments) > 0 {
-		status = mention.Status
-	} else {
+	// If mentioning status has no images and reply exists, use reply
+	if (mention.Status.MediaAttachments != nil || len(mention.Status.MediaAttachments) > 0) && mention.Status.ReplyToID != "" {
 		reply, err := fedi.GetStatus(mention.Status.ReplyToID, instanceURL, accessToken)
 		if err != nil {
 			PostError(err, mention.Status, instanceURL, accessToken)
@@ -30,6 +31,27 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 
 		if reply.ID != "" {
 			status = reply
+		}
+		// otherwise apply to the profile pictures of tagged users
+	} else if len(mention.Status.Mentions) > 1 {
+		self, err := fedi.GetCurrentUser(instanceURL, accessToken)
+		if err != nil {
+			PostError(err, mention.Status, instanceURL, accessToken)
+			return
+		}
+
+		// add the profile pics of non self mentioned users as attachments to the status
+		for _, m := range mention.Status.Mentions {
+			if m.ID != self.ID {
+				user, err := fedi.GetUser(m.ID, instanceURL, accessToken)
+				if err != nil {
+					PostError(err, mention.Status, instanceURL, accessToken)
+					return
+				}
+
+				newImage := fedi.Attachment{URL: user.Avatar}
+				status.MediaAttachments = append(status.MediaAttachments, newImage)
+			}
 		}
 	}
 

@@ -8,30 +8,23 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Account - Mastodon account object
-type Account struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Acct     string `json:"acct"`
-	Avatar   string `json:"avatar"`
-}
-
-// Mention - Mastodon mention object
-type Mention struct {
+// Notification - Mastodon notification object
+type Notification struct {
 	ID      string  `json:"id"`
+	Type    string  `json:"type"`
 	Account Account `json:"account"`
 	Status  Status  `json:"status"`
 }
 
 // GetMentions -
-func GetMentions(instanceURL, accessToken string) []Mention {
+func GetMentions(instanceURL, accessToken string) []Notification {
 	url, err := url.Parse(instanceURL + "/api/v1/notifications")
 	if err != nil {
 		panic(err)
 	}
 
 	lastID := viper.GetString("last_mention_id")
-	mentions := make([]Mention, 0)
+	mentions := make([]Notification, 0)
 
 	_, err = resty.New().R().
 		SetAuthToken(accessToken).
