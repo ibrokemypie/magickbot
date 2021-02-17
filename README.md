@@ -50,3 +50,5 @@ max_pixels: 640000
 - Local instance only mode
 
 - Command list
+
+- Apply to mentioned user if status is not a reply and has no images
