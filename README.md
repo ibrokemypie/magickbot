@@ -24,7 +24,7 @@ explode
 
 implode
 
-magik
+magik (limited to one iteration because of processing load and ugly results)
 
 ### Sample config
 

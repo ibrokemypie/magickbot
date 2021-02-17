@@ -75,13 +75,14 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 				operation = magick.IMPLODE
 			case "magik":
 				operation = magick.MAGIK
+				iterations = 1
 			default:
 				continue
 			}
 
 			if operation != "" {
 				// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
-				if len(textSplit) > k+1 {
+				if operation != magick.MAGIK && len(textSplit) > k+1 {
 					j, err := strconv.Atoi(textSplit[k+1])
 					if err == nil && iterations > 0 && iterations <= maxIterations {
 						iterations = j
