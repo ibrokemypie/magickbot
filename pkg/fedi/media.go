@@ -10,8 +10,12 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-type Media struct {
-	ID string `json:"id"`
+// Attachment - Mastodon attachment object
+type Attachment struct {
+	ID        string `json:"id"`
+	MediaType string `json:"type"`
+	URL       string `json:"url"`
+	RemoteURL string `json:"remote_url"`
 }
 
 // GetMedia - Download media to tmp from url
@@ -40,7 +44,7 @@ func PostMedia(files []string, replyToID, instanceURL, accessToken string) error
 			panic(err)
 		}
 
-		var result Media
+		var result Attachment
 
 		_, err = resty.New().R().
 			SetAuthToken(accessToken).

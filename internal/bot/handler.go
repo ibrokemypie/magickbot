@@ -14,6 +14,7 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 	var status fedi.Status
 	var operation func([]string, int) error
 	var iterations = 1
+	var providedMedia = false
 
 	if mention.Status.MediaAttachments != nil && len(mention.Status.MediaAttachments) > 0 {
 		status = mention.Status
@@ -24,9 +25,13 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 			return
 		}
 
-		if reply.MediaAttachments != nil && len(reply.MediaAttachments) > 0 {
+		if reply.ID != "" {
 			status = reply
 		}
+	}
+
+	if status.MediaAttachments != nil && len(status.MediaAttachments) > 0 {
+		providedMedia = true
 	}
 
 	if status.MediaAttachments != nil {
@@ -54,9 +59,31 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 					}
 				}
 
-				// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
-				for _, attachment := range status.MediaAttachments {
-					files = append(files, fedi.GetMedia(attachment.URL, accessToken))
+				// If there was an attachment in the mention or the status it replied to, use that, otherwise apply operation to the avatar
+				if providedMedia {
+					// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
+					for _, attachment := range status.MediaAttachments {
+						files = append(files, fedi.GetMedia(attachment.URL, accessToken))
+						err := operation(files, iterations)
+						// retry once
+						if err != nil {
+							log.Println(err)
+							err = operation(files, iterations)
+							if err != nil {
+								PostError(err, mention.Status.ID, instanceURL, accessToken)
+								return
+							}
+						}
+
+						err = fedi.PostMedia(files, mention.Status.ID, instanceURL, accessToken)
+						if err != nil {
+							PostError(err, mention.Status.ID, instanceURL, accessToken)
+							return
+						}
+					}
+					break Loop
+				} else {
+					files = append(files, fedi.GetMedia(status.Account.Avatar, accessToken))
 					err := operation(files, iterations)
 					// retry once
 					if err != nil {
@@ -73,8 +100,9 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 						PostError(err, mention.Status.ID, instanceURL, accessToken)
 						return
 					}
+
+					break Loop
 				}
-				break Loop
 			}
 		}
 	}

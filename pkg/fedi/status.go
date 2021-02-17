@@ -6,6 +6,16 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+// Status - Mastodon status object
+type Status struct {
+	ID               string       `json:"id"`
+	ReplyToID        string       `json:"in_reply_to_id"`
+	Content          string       `json:"content"`
+	Text             string       `json:"text"`
+	MediaAttachments []Attachment `json:"media_attachments"`
+	Account          Account      `json:"account"`
+}
+
 // GetStatus - Return a status object from an ID
 func GetStatus(id, instanceURL, accessToken string) (Status, error) {
 	url, err := url.Parse(instanceURL + "/api/v1/statuses/" + id)

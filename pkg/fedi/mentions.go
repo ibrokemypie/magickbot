@@ -13,23 +13,7 @@ type Account struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 	Acct     string `json:"acct"`
-}
-
-// Attachment - Mastodon attachment object
-type Attachment struct {
-	ID        string `json:"id"`
-	MediaType string `json:"type"`
-	URL       string `json:"url"`
-	RemoteURL string `json:"remote_url"`
-}
-
-// Status - Mastodon status object
-type Status struct {
-	ID               string       `json:"id"`
-	ReplyToID        string       `json:"in_reply_to_id"`
-	Content          string       `json:"content"`
-	Text             string       `json:"text"`
-	MediaAttachments []Attachment `json:"media_attachments"`
+	Avatar   string `json:"avatar"`
 }
 
 // Mention - Mastodon mention object
