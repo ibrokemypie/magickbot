@@ -1,7 +1,6 @@
 package fedi
 
 import (
-	"log"
 	"net/url"
 	"os"
 	"path"
@@ -52,7 +51,6 @@ func PostMedia(files []string, replyToID, instanceURL, accessToken string) error
 			SetResult(&result).
 			Post(u.String())
 		if err != nil {
-			log.Fatal(err)
 			return (err)
 		}
 
@@ -75,6 +73,10 @@ func PostMedia(files []string, replyToID, instanceURL, accessToken string) error
 				"media_ids[]":    mediaIDs,
 			}).
 			Post(u.String())
+		if err != nil {
+			return (err)
+		}
+
 	}
 
 	return nil
