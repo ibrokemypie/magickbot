@@ -54,7 +54,7 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 				continue
 			}
 
-			if operation != 0 {
+			if operation != "" {
 				// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
 				if len(textSplit) > k+1 {
 					j, err := strconv.Atoi(textSplit[k+1])
@@ -86,8 +86,15 @@ func handleMention(mention fedi.Mention, instanceURL, accessToken string) {
 				}
 			}
 
+			content := strings.Builder{}
+			content.WriteString("Ran ")
+			content.WriteString(strconv.Itoa(iterations))
+			content.WriteString(" iteration(s) of ")
+			content.WriteString(string(operation))
+			content.WriteString(":")
+
 			// Try to post the manipulated files
-			err = fedi.PostMedia(files, mention.Status, instanceURL, accessToken)
+			err = fedi.PostMedia(content.String(), files, mention.Status, instanceURL, accessToken)
 			if err != nil {
 				PostError(err, mention.Status, instanceURL, accessToken)
 				return

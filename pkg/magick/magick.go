@@ -7,12 +7,12 @@ import (
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
-type MagickCommand int
+type MagickCommand string
 
 const (
-	EXPLODE = iota + 1
-	IMPLODE
-	MAGIK
+	EXPLODE = "explode"
+	IMPLODE = "implode"
+	MAGIK   = "magik"
 )
 
 func RunMagick(command MagickCommand, files []string, iterations int) error {

@@ -34,7 +34,7 @@ func GetMedia(mediaURL string, accessToken string) string {
 }
 
 // PostMedia - Upload files and create a new status
-func PostMedia(files []string, reply Status, instanceURL, accessToken string) error {
+func PostMedia(content string, files []string, reply Status, instanceURL, accessToken string) error {
 
 	var mediaIDs = make([]string, 0)
 
@@ -67,6 +67,7 @@ func PostMedia(files []string, reply Status, instanceURL, accessToken string) er
 		_, err = resty.New().R().
 			SetAuthToken(accessToken).
 			SetFormDataFromValues(url.Values{
+				"status":         []string{content},
 				"in_reply_to_id": []string{reply.ID},
 				"visibility":     []string{reply.Visibility},
 				"sensitive":      []string{strconv.FormatBool(reply.Sensitive)},
