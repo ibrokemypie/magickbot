@@ -55,10 +55,10 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 
 	if status.MediaAttachments != nil {
 		files := make([]string, 0)
-		p := bluemonday.StrictPolicy()
+		p := bluemonday.StrictPolicy().AddSpaceWhenStrippingTag(true)
 		text := p.Sanitize(mention.Status.Content)
 
-		textSplit := strings.Split(text, " ")
+		textSplit := strings.Fields(text)
 
 		for k, v := range textSplit {
 			if v == "help" {
@@ -73,18 +73,16 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 				}
 			}
 
+			if v == "random" {
+				operation = magick.MagickCommands[rand.Intn(len(magick.MagickCommands))]
+				argument = rand.Intn(maxIterations) + 1
+			}
+
 			// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
 			if len(textSplit) > k+1 {
 				j, err := strconv.Atoi(textSplit[k+1])
 				if err == nil {
 					argument = j
-				}
-			}
-
-			if v == "random" {
-				operation = magick.MagickCommands[rand.Intn(len(magick.MagickCommands))]
-				if argument == 0 {
-					argument = rand.Intn(maxIterations) + 1
 				}
 			}
 
