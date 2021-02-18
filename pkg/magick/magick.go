@@ -135,6 +135,11 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 					return (err)
 				}
 
+				err = mw.SharpenImage(0, 4)
+				if err != nil {
+					return (err)
+				}
+
 				file = strings.TrimSuffix(file, filepath.Ext(file)) + ".jpg"
 			}
 		default:
