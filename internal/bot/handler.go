@@ -8,18 +8,15 @@ import (
 	"github.com/ibrokemypie/magickbot/pkg/fedi"
 	"github.com/ibrokemypie/magickbot/pkg/magick"
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/spf13/viper"
 )
 
 func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 	var status fedi.Status
 	var operation magick.MagickCommand
-	var iterations = 1
+	var argument = 1
 	var providedMedia = false
 
 	status = mention.Status
-
-	maxIterations := viper.GetInt("max_iterations")
 
 	self, err := fedi.GetCurrentUser(instanceURL, accessToken)
 	if err != nil {
@@ -75,17 +72,16 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 				operation = magick.IMPLODE
 			case "magik":
 				operation = magick.MAGIK
-				iterations = 1
 			default:
 				continue
 			}
 
 			if operation != "" {
 				// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
-				if operation != magick.MAGIK && len(textSplit) > k+1 {
+				if len(textSplit) > k+1 {
 					j, err := strconv.Atoi(textSplit[k+1])
-					if err == nil && iterations > 0 && iterations <= maxIterations {
-						iterations = j
+					if err == nil {
+						argument = j
 					}
 				}
 
@@ -101,11 +97,11 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 			}
 
 			// Try to run the magick operation on the files
-			err := magick.RunMagick(operation, files, iterations)
+			err := magick.RunMagick(operation, files, argument)
 			// retry once
 			if err != nil {
 				log.Println(err)
-				err = magick.RunMagick(operation, files, iterations)
+				err = magick.RunMagick(operation, files, argument)
 				if err != nil {
 					PostError(err, mention.Status, instanceURL, accessToken)
 					return
@@ -126,9 +122,9 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 			content.WriteString("\n")
 
 			content.WriteString("Ran ")
-			content.WriteString(strconv.Itoa(iterations))
-			content.WriteString(" iteration(s) of ")
 			content.WriteString(string(operation))
+			content.WriteString(" ")
+			content.WriteString(strconv.Itoa(argument))
 			content.WriteString(":")
 
 			// Try to post the manipulated files

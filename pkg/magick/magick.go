@@ -17,7 +17,7 @@ const (
 	MAGIK   = "magik"
 )
 
-func RunMagick(command MagickCommand, files []string, iterations int) error {
+func RunMagick(command MagickCommand, files []string, argument int) error {
 	imagick.Initialize()
 	defer imagick.Terminate()
 
@@ -25,6 +25,7 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 	defer mw.Destroy()
 
 	maxPixels := uint(viper.GetInt("max_pixels"))
+	maxIterations := viper.GetInt("max_iterations")
 
 	// run specified iterations of operations  for each file
 	for k, file := range files {
@@ -52,38 +53,57 @@ func RunMagick(command MagickCommand, files []string, iterations int) error {
 			width = mw.GetImageWidth()
 		}
 
-		//  Run the magick operation iterations number of times
-		for i := 0; i < iterations; i++ {
-			switch command {
-			case EXPLODE:
-				{
+		switch command {
+		case EXPLODE:
+			{
+				if argument < 1 {
+					argument = 1
+				} else if argument > maxIterations {
+					argument = maxIterations
+				}
+
+				for i := 0; i < argument; i++ {
 					err = mw.ImplodeImage(-.5, imagick.INTERPOLATE_PIXEL_UNDEFINED)
 					if err != nil {
 						return (err)
 					}
 				}
-			case IMPLODE:
-				{
+			}
+		case IMPLODE:
+			{
+				if argument < 1 {
+					argument = 1
+				} else if argument > maxIterations {
+					argument = maxIterations
+				}
+
+				for i := 0; i < argument; i++ {
 					err = mw.ImplodeImage(.5, imagick.INTERPOLATE_PIXEL_UNDEFINED)
 					if err != nil {
 						return (err)
 					}
 				}
-			case MAGIK:
-				{
-					err = mw.LiquidRescaleImage(uint(width/2), uint(height/2), 1, 0)
-					if err != nil {
-						return (err)
-					}
-					err = mw.LiquidRescaleImage(uint(float32(width)*1.5), uint(float32(height)*1.5), 2, 0)
-					if err != nil {
-						return (err)
-					}
+			}
+		case MAGIK:
+			{
+				if argument < 1 {
+					argument = 1
+				} else if argument > maxIterations {
+					argument = maxIterations
 				}
-			default:
-				{
-					return errors.New("Unsupported command")
+
+				err = mw.LiquidRescaleImage(uint(width/2), uint(height/2), 1*float64(argument), 0)
+				if err != nil {
+					return (err)
 				}
+				err = mw.LiquidRescaleImage(uint(float32(width)*1.5), uint(float32(height)*1.5), 2*float64(argument), 0)
+				if err != nil {
+					return (err)
+				}
+			}
+		default:
+			{
+				return errors.New("Unsupported command")
 			}
 		}
 
