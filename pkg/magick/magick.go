@@ -160,7 +160,7 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 			}
 		default:
 			{
-				return -1, errors.New("Unsupported command")
+				return -1, errors.New("Unsupported command, try \"help\"")
 			}
 		}
 
