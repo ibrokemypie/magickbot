@@ -100,54 +100,56 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 			}
 		}
 
-		// If there was an attachment in the mention or the status it replied to, use that, otherwise apply operation to the avatar
-		if providedMedia {
-			// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
-			for _, attachment := range status.MediaAttachments {
-				files = append(files, fedi.GetMedia(attachment.URL, accessToken))
+		if operation != "" {
+			// If there was an attachment in the mention or the status it replied to, use that, otherwise apply operation to the avatar
+			if providedMedia {
+				// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
+				for _, attachment := range status.MediaAttachments {
+					files = append(files, fedi.GetMedia(attachment.URL, accessToken))
+				}
+			} else {
+				files = append(files, fedi.GetMedia(status.Account.Avatar, accessToken))
 			}
-		} else {
-			files = append(files, fedi.GetMedia(status.Account.Avatar, accessToken))
-		}
 
-		// Try to run the magick operation on the files
-		argument, err := magick.RunMagick(operation, files, argument)
-		// retry once
-		if err != nil {
-			log.Println(err)
-			argument, err = magick.RunMagick(operation, files, argument)
+			// Try to run the magick operation on the files
+			argument, err := magick.RunMagick(operation, files, argument)
+			// retry once
+			if err != nil {
+				log.Println(err)
+				argument, err = magick.RunMagick(operation, files, argument)
+				if err != nil {
+					PostError(err, mention.Status, instanceURL, accessToken)
+					return
+				}
+			}
+
+			content := strings.Builder{}
+			for _, m := range mention.Status.Mentions {
+				if m.ID != selfID && m.ID != mention.Status.Account.Acct {
+					content.WriteString("@")
+					content.WriteString(m.Acct)
+					content.WriteString(", ")
+				}
+			}
+
+			content.WriteString("@")
+			content.WriteString(mention.Status.Account.Acct)
+			content.WriteString("\n")
+
+			content.WriteString("Ran ")
+			content.WriteString(string(operation))
+			if argument != -1 {
+				content.WriteString(" ")
+				content.WriteString(strconv.Itoa(argument))
+			}
+			content.WriteString(":")
+
+			// Try to post the manipulated files
+			err = fedi.PostMedia(content.String(), files, mention.Status, instanceURL, accessToken)
 			if err != nil {
 				PostError(err, mention.Status, instanceURL, accessToken)
 				return
 			}
-		}
-
-		content := strings.Builder{}
-		for _, m := range mention.Status.Mentions {
-			if m.ID != selfID && m.ID != mention.Status.Account.Acct {
-				content.WriteString("@")
-				content.WriteString(m.Acct)
-				content.WriteString(", ")
-			}
-		}
-
-		content.WriteString("@")
-		content.WriteString(mention.Status.Account.Acct)
-		content.WriteString("\n")
-
-		content.WriteString("Ran ")
-		content.WriteString(string(operation))
-		if argument != -1 {
-			content.WriteString(" ")
-			content.WriteString(strconv.Itoa(argument))
-		}
-		content.WriteString(":")
-
-		// Try to post the manipulated files
-		err = fedi.PostMedia(content.String(), files, mention.Status, instanceURL, accessToken)
-		if err != nil {
-			PostError(err, mention.Status, instanceURL, accessToken)
-			return
 		}
 	}
 }
