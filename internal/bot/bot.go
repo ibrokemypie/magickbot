@@ -2,6 +2,7 @@ package bot
 
 import (
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -74,7 +75,6 @@ func PostHelp(reply fedi.Status, selfID string, instanceURL, accessToken string)
 	content.WriteString("Magickbot \n\n")
 	content.WriteString("Source: \n")
 	content.WriteString("https://github.com/ibrokemypie/magickbot \n\n")
-	content.WriteString("Help: \n\n")
 	content.WriteString("Usage: \n")
 	content.WriteString("Tag the bot either in a status containing media, a reply to a status containing media, a status containing mentions of users to apply to their avatars or a reply to a status with no media to apply to the user's avatar. Include the command (eg. explode) in your status, optionally include an argument. The only order that matters is argument must be after command.\n\n")
 	content.WriteString("command [argument] [@user...]\n\n")
@@ -83,7 +83,14 @@ func PostHelp(reply fedi.Status, selfID string, instanceURL, accessToken string)
 	content.WriteString("explode [iterations]\n")
 	content.WriteString("implode [iterations]\n")
 	content.WriteString("magick [scale]\n")
-	content.WriteString("compress [iterations]\n")
+	content.WriteString("compress [iterations]\n\n")
+	content.WriteString("Bot Configuration: \n")
+	content.WriteString("Max iterations: ")
+	content.WriteString(strconv.Itoa(viper.GetInt("max_iterations")))
+	content.WriteString("\nMax input pixels: ")
+	content.WriteString(strconv.Itoa(viper.GetInt("max_pixels_in")))
+	content.WriteString("\nMax output pixels: ")
+	content.WriteString(strconv.Itoa(viper.GetInt("max_pixels_out")))
 
 	err := fedi.PostStatus(content.String(), reply, instanceURL, accessToken)
 	if err != nil {
