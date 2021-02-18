@@ -24,7 +24,7 @@ explode [iterations]
 
 implode [iterations]
 
-magik [scale]
+magick [scale]
 
 ### Sample config
 

@@ -14,7 +14,7 @@ type MagickCommand string
 const (
 	EXPLODE = "explode"
 	IMPLODE = "implode"
-	MAGIK   = "magik"
+	MAGIK   = "magick"
 )
 
 func RunMagick(command MagickCommand, files []string, argument int) error {
