@@ -28,7 +28,7 @@ implode [iterations]
 
 magick [scale]
 
-compress [quality]
+compress [amount (0-100)]
 
 ### Sample config
 

@@ -113,7 +113,7 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 		case COMPRESS:
 			{
 				if argument == 0 {
-					argument = 15
+					argument = 85
 				} else if argument < 1 {
 					argument = 1
 				} else if argument > 100 {
@@ -130,7 +130,7 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 					return (err)
 				}
 
-				err = mw.SetImageCompressionQuality(uint(argument))
+				err = mw.SetImageCompressionQuality(100 - uint(argument))
 				if err != nil {
 					return (err)
 				}
