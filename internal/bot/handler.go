@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ibrokemypie/magickbot/pkg/fedi"
 	"github.com/ibrokemypie/magickbot/pkg/magick"
@@ -74,6 +75,7 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 			}
 
 			if v == "random" {
+				rand.NewSource(time.Now().UnixNano())
 				operation = magick.MagickCommands[rand.Intn(len(magick.MagickCommands))]
 				argument = rand.Intn(maxIterations) + 1
 			}
