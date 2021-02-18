@@ -28,8 +28,8 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
-	maxInputPixels := uint(viper.GetInt("max_pixels_in"))
-	maxOutputPixels := uint(viper.GetInt("max_pixels_out"))
+	maxInputPixels := viper.GetUint("max_pixels_in")
+	maxOutputPixels := viper.GetUint("max_pixels_out")
 	maxIterations := viper.GetInt("max_iterations")
 
 	// run specified iterations of operations  for each file
