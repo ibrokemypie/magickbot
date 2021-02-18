@@ -27,9 +27,10 @@ func BotLoop() {
 			mention := mentions[len(mentions)-1-k]
 			if mention.Account.ID != self.ID {
 				handleMention(mention, self.ID, instanceURL, accessToken)
-				viper.Set("last_mention_id", mention.ID)
-				viper.WriteConfig()
 			}
+
+			viper.Set("last_mention_id", mention.ID)
+			viper.WriteConfig()
 		}
 	}
 }

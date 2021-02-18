@@ -18,7 +18,7 @@ type Notification struct {
 
 // GetMentions -
 func GetMentions(instanceURL, accessToken string) []Notification {
-	url, err := url.Parse(instanceURL + "/api/v1/notifications")
+	u, err := url.Parse(instanceURL + "/api/v1/notifications")
 	if err != nil {
 		panic(err)
 	}
@@ -28,14 +28,15 @@ func GetMentions(instanceURL, accessToken string) []Notification {
 
 	_, err = resty.New().R().
 		SetAuthToken(accessToken).
-		SetFormData(map[string]string{
-			"exclude_types": "follow favourite reblog poll follow_request",
+		SetQueryParamsFromValues(url.Values{
+			"min_id":          []string{lastID},
+			"exclude_types[]": []string{"follow", "favourite", "reblog", "poll", "follow_request"},
 		}).
-		SetQueryParam("min_id", lastID).
 		SetResult(&mentions).
-		Get(url.String())
+		Get(u.String())
 	if err != nil {
 		log.Println(err)
 	}
+
 	return mentions
 }
