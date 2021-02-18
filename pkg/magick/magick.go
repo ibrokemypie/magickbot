@@ -16,7 +16,9 @@ var MagickCommands = []string{
 	"explode",
 	"implode",
 	"magick",
+	"kagik",
 	"moarjpeg",
+	"compress",
 	"deepfry",
 }
 
@@ -92,7 +94,7 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 					}
 				}
 			}
-		case "magick":
+		case "magick", "magik":
 			{
 				if argument < 1 {
 					argument = 5
@@ -102,7 +104,7 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 
 				magick(mw, float64(width), float64(height), float64(argument))
 			}
-		case "moarjpeg":
+		case "moarjpeg", "compress":
 			{
 				if argument < 1 {
 					argument = 1
