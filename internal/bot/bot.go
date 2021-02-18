@@ -83,6 +83,7 @@ func PostHelp(reply fedi.Status, selfID string, instanceURL, accessToken string)
 	content.WriteString("explode [iterations]\n")
 	content.WriteString("implode [iterations]\n")
 	content.WriteString("magick [scale]\n")
+	content.WriteString("compress [quality]\n")
 
 	err := fedi.PostStatus(content.String(), reply, instanceURL, accessToken)
 	if err != nil {

@@ -4,7 +4,9 @@ import (
 	"errors"
 	"math"
 	"path"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/viper"
 	"gopkg.in/gographics/imagick.v3/imagick"
@@ -13,9 +15,10 @@ import (
 type MagickCommand string
 
 const (
-	EXPLODE = "explode"
-	IMPLODE = "implode"
-	MAGICK  = "magick"
+	EXPLODE  = "explode"
+	IMPLODE  = "implode"
+	MAGICK   = "magick"
+	COMPRESS = "compress"
 )
 
 func RunMagick(command MagickCommand, files []string, argument int) error {
@@ -106,6 +109,31 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 				if err != nil {
 					return (err)
 				}
+			}
+		case COMPRESS:
+			{
+				if argument < 1 {
+					argument = 1
+				} else if argument > 100 {
+					argument = 100
+				}
+
+				err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
+				if err != nil {
+					return (err)
+				}
+
+				err = mw.SetImageCompression(imagick.COMPRESSION_JPEG)
+				if err != nil {
+					return (err)
+				}
+
+				err = mw.SetImageCompressionQuality(uint(argument))
+				if err != nil {
+					return (err)
+				}
+
+				file = strings.TrimSuffix(file, filepath.Ext(file)) + ".jpg"
 			}
 		default:
 			{

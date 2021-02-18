@@ -28,6 +28,8 @@ implode [iterations]
 
 magick [scale]
 
+compress [quality]
+
 ### Sample config
 
 `$HOME/.config/magickbot/config.yaml:`

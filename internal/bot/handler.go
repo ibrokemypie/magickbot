@@ -63,12 +63,14 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 			case "help":
 				PostHelp(mention.Status, selfID, instanceURL, accessToken)
 				return
-			case "explode":
+			case magick.EXPLODE:
 				operation = magick.EXPLODE
-			case "implode":
+			case magick.IMPLODE:
 				operation = magick.IMPLODE
-			case "magick":
+			case magick.MAGICK:
 				operation = magick.MAGICK
+			case magick.COMPRESS:
+				operation = magick.COMPRESS
 			default:
 				continue
 			}
