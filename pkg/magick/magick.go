@@ -94,19 +94,12 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 		case "magick":
 			{
 				if argument < 1 {
-					argument = 1
+					argument = 5
 				} else if argument > maxIterations {
 					argument = maxIterations
 				}
 
-				err = mw.LiquidRescaleImage(uint(width/2), uint(height/2), 1*float64(argument), 0)
-				if err != nil {
-					return -1, err
-				}
-				err = mw.LiquidRescaleImage(uint(float32(width)*1.5), uint(float32(height)*1.5), 2*float64(argument), 0)
-				if err != nil {
-					return -1, err
-				}
+				magick(mw, float64(width), float64(height), float64(argument))
 			}
 		case "compress":
 			{
@@ -178,6 +171,27 @@ func jpegify(mw *imagick.MagickWand) error {
 	}
 
 	err = mw.SharpenImage(0, 4)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func magick(mw *imagick.MagickWand, width, height, scale float64) error {
+	scaleOne := float64(1)
+	scaleTwo := float64(2)
+	if scale != 0 {
+		scaleOne = float64(scale) / 2
+		scaleTwo = float64(scale)
+	}
+
+	err := mw.LiquidRescaleImage(uint(width/2), uint(height/2), scaleOne, 0)
+	if err != nil {
+		return err
+	}
+
+	err = mw.LiquidRescaleImage(uint(width*1.5), uint(height*1.5), scaleTwo, 0)
 	if err != nil {
 		return err
 	}
