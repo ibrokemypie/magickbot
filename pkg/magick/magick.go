@@ -17,6 +17,7 @@ var MagickCommands = []string{
 	"implode",
 	"magick",
 	"compress",
+	"deepfry",
 }
 
 func RunMagick(command string, files []string, argument int) (int, error) {
@@ -128,8 +129,46 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 					if err != nil {
 						return -1, err
 					}
-
 				}
+			}
+		case "deepfry":
+			{
+				err = deepfry(mw, width, height)
+				if err != nil {
+					return -1, err
+				}
+
+				err = mw.WriteImage(file)
+				if err != nil {
+					return -1, err
+				}
+
+				err := mw.ReadImage(file)
+				if err != nil {
+					return -1, err
+				}
+
+				err = jpegify(mw)
+				if err != nil {
+					return -1, err
+				}
+
+				err = mw.WriteImage(file)
+				if err != nil {
+					return -1, err
+				}
+
+				err = mw.ReadImage(file)
+				if err != nil {
+					return -1, err
+				}
+
+				err = jpegify(mw)
+				if err != nil {
+					return -1, err
+				}
+
+				argument = -1
 			}
 		default:
 			{
@@ -192,6 +231,40 @@ func magick(mw *imagick.MagickWand, width, height, scale float64) error {
 	}
 
 	err = mw.LiquidRescaleImage(uint(width*1.5), uint(height*1.5), scaleTwo, 0)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deepfry(mw *imagick.MagickWand, width, height uint) error {
+	orangeOverlay := imagick.NewPixelWand()
+	orangeOverlay.SetColor("#992604")
+	orangeOverlay.SetAlpha(65)
+
+	orangeOverlayImage := imagick.NewMagickWand()
+	err := orangeOverlayImage.NewImage(width, height, orangeOverlay)
+	if err != nil {
+		return err
+	}
+
+	err = mw.CompositeImage(orangeOverlayImage, imagick.COMPOSITE_OP_OVERLAY, true, 0, 0)
+	if err != nil {
+		return err
+	}
+
+	err = jpegify(mw)
+	if err != nil {
+		return err
+	}
+
+	err = mw.ContrastImage(true)
+	if err != nil {
+		return err
+	}
+
+	err = mw.ModulateImage(100, 150, 100)
 	if err != nil {
 		return err
 	}

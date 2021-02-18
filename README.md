@@ -30,6 +30,8 @@ magick [scale]
 
 compress [iterations]
 
+deepfry
+
 random [argument]
 
 ### Sample config
