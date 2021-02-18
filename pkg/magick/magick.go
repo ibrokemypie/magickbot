@@ -131,27 +131,7 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 						}
 					}
 
-					err = mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
-					if err != nil {
-						return -1, err
-					}
-
-					err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
-					if err != nil {
-						return -1, err
-					}
-
-					err = mw.SetImageCompression(imagick.COMPRESSION_JPEG)
-					if err != nil {
-						return -1, err
-					}
-
-					err = mw.SetImageCompressionQuality(15)
-					if err != nil {
-						return -1, err
-					}
-
-					err = mw.SharpenImage(0, 4)
+					err = jpegify(mw)
 					if err != nil {
 						return -1, err
 					}
@@ -174,4 +154,33 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 	}
 
 	return argument, nil
+}
+
+func jpegify(mw *imagick.MagickWand) error {
+	err := mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
+	if err != nil {
+		return err
+	}
+
+	err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
+	if err != nil {
+		return err
+	}
+
+	err = mw.SetImageCompression(imagick.COMPRESSION_JPEG)
+	if err != nil {
+		return err
+	}
+
+	err = mw.SetImageCompressionQuality(15)
+	if err != nil {
+		return err
+	}
+
+	err = mw.SharpenImage(0, 4)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
