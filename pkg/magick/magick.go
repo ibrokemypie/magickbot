@@ -112,40 +112,53 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 			}
 		case COMPRESS:
 			{
-				if argument == 0 {
-					argument = 85
-				} else if argument < 1 {
+				if argument < 1 {
 					argument = 1
-				} else if argument > 100 {
-					argument = 100
-				}
-
-				err = mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
-				if err != nil {
-					return (err)
-				}
-
-				err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
-				if err != nil {
-					return (err)
-				}
-
-				err = mw.SetImageCompression(imagick.COMPRESSION_JPEG)
-				if err != nil {
-					return (err)
-				}
-
-				err = mw.SetImageCompressionQuality(100 - uint(argument))
-				if err != nil {
-					return (err)
-				}
-
-				err = mw.SharpenImage(0, 4)
-				if err != nil {
-					return (err)
+				} else if argument > maxIterations {
+					argument = maxIterations
 				}
 
 				file = strings.TrimSuffix(file, filepath.Ext(file)) + ".jpg"
+
+				for i := 0; i < argument; i++ {
+					if i > 1 {
+						err = mw.WriteImage(file)
+						if err != nil {
+							return (err)
+						}
+
+						err := mw.ReadImage(file)
+						if err != nil {
+							return (err)
+						}
+					}
+
+					err = mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
+					if err != nil {
+						return (err)
+					}
+
+					err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
+					if err != nil {
+						return (err)
+					}
+
+					err = mw.SetImageCompression(imagick.COMPRESSION_JPEG)
+					if err != nil {
+						return (err)
+					}
+
+					err = mw.SetImageCompressionQuality(15)
+					if err != nil {
+						return (err)
+					}
+
+					err = mw.SharpenImage(0, 4)
+					if err != nil {
+						return (err)
+					}
+
+				}
 			}
 		default:
 			{
