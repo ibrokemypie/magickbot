@@ -14,11 +14,13 @@ Depends on go with modules support and imagemagick v7+.
 
 Run `magickbot`, first time running will prompt for oauth authentication for your bot user and instance.
 
-Tag the bot either in a status containing media, a reply to a status containing media, a status containing mentions of users to apply to their avatars or a reply to a status with no media to apply to the user's avatar. Include the command (eg. explode) in your status, optionally include an argument.
+Tag the bot either in a status containing media, a reply to a status containing media, a status containing mentions of users to apply to their avatars or a reply to a status with no media to apply to the user's avatar. Include the command (eg. explode) in your status, optionally include an argument. The only order that matters is argument must be after command.
 
 `command [argument] [@user...]`
 
 ### Commands
+
+help
 
 explode [iterations]
 
@@ -49,5 +51,3 @@ max_iterations: 15
 - User whitelist
 
 - Local instance only mode
-
-- Command list

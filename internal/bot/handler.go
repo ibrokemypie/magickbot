@@ -66,6 +66,9 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 	Loop:
 		for k, v := range textSplit {
 			switch v {
+			case "help":
+				PostHelp(mention.Status, self.ID, instanceURL, accessToken)
+				return
 			case "explode":
 				operation = magick.EXPLODE
 			case "implode":
