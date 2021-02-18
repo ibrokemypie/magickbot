@@ -38,7 +38,8 @@ instance:
     access_token: xxxxxxxxxxxxxxxxxxxxxxx
 
 last_mention_id: xxxxxx
-max_pixels: 640000
+max_pixels_in: 9000000
+max_pixels_out: 640000
 max_iterations: 15
 ```
 

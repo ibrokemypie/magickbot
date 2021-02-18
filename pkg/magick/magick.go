@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 	"path"
+	"strconv"
 
 	"github.com/spf13/viper"
 	"gopkg.in/gographics/imagick.v3/imagick"
@@ -24,7 +25,8 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
-	maxPixels := uint(viper.GetInt("max_pixels"))
+	maxInputPixels := uint(viper.GetInt("max_pixels_in"))
+	maxOutputPixels := uint(viper.GetInt("max_pixels_out"))
 	maxIterations := viper.GetInt("max_iterations")
 
 	// run specified iterations of operations  for each file
@@ -37,12 +39,16 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 		height := mw.GetImageHeight()
 		width := mw.GetImageWidth()
 
+		if height*width > maxInputPixels {
+			return (errors.New("Input too large! Maximum pixels: " + strconv.Itoa(int(maxInputPixels))))
+		}
+
 		// If the image has more than maxPixels pixels, resize it down to fit. This is to reduce the maximum utilisation from a single operation.
-		if width*height > maxPixels {
+		if width*height > maxOutputPixels {
 
 			ratio := float64(width) / float64(height)
-			newHeight := math.Sqrt(float64(maxPixels) / ratio)
-			newWidth := float64(maxPixels) / newHeight
+			newHeight := math.Sqrt(float64(maxOutputPixels) / ratio)
+			newWidth := float64(maxOutputPixels) / newHeight
 
 			mw.ResizeImage(uint(newWidth), uint(newWidth), imagick.FILTER_UNDEFINED)
 			if err != nil {
