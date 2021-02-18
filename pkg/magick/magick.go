@@ -110,60 +110,12 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 					argument = maxIterations
 				}
 
-				file = strings.TrimSuffix(file, filepath.Ext(file)) + ".jpg"
+				jpegify(mw, argument, file)
 
-				for i := 0; i < argument; i++ {
-					if i > 1 {
-						err = mw.WriteImage(file)
-						if err != nil {
-							return -1, err
-						}
-
-						err := mw.ReadImage(file)
-						if err != nil {
-							return -1, err
-						}
-					}
-
-					err = jpegify(mw)
-					if err != nil {
-						return -1, err
-					}
-				}
 			}
 		case "deepfry":
 			{
-				err = deepfry(mw, width, height)
-				if err != nil {
-					return -1, err
-				}
-
-				err = mw.WriteImage(file)
-				if err != nil {
-					return -1, err
-				}
-
-				err := mw.ReadImage(file)
-				if err != nil {
-					return -1, err
-				}
-
-				err = jpegify(mw)
-				if err != nil {
-					return -1, err
-				}
-
-				err = mw.WriteImage(file)
-				if err != nil {
-					return -1, err
-				}
-
-				err = mw.ReadImage(file)
-				if err != nil {
-					return -1, err
-				}
-
-				err = jpegify(mw)
+				err = deepfry(mw, width, height, file)
 				if err != nil {
 					return -1, err
 				}
@@ -188,30 +140,46 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 	return argument, nil
 }
 
-func jpegify(mw *imagick.MagickWand) error {
-	err := mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
-	if err != nil {
-		return err
-	}
+func jpegify(mw *imagick.MagickWand, iterations int, file string) error {
+	file = strings.TrimSuffix(file, filepath.Ext(file)) + ".jpg"
 
-	err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
-	if err != nil {
-		return err
-	}
+	for i := 0; i < iterations; i++ {
+		if i > 1 {
+			err := mw.WriteImage(file)
+			if err != nil {
+				return err
+			}
 
-	err = mw.SetImageCompression(imagick.COMPRESSION_JPEG)
-	if err != nil {
-		return err
-	}
+			err = mw.ReadImage(file)
+			if err != nil {
+				return err
+			}
+		}
 
-	err = mw.SetImageCompressionQuality(15)
-	if err != nil {
-		return err
-	}
+		err := mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
+		if err != nil {
+			return err
+		}
 
-	err = mw.SharpenImage(0, 4)
-	if err != nil {
-		return err
+		err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
+		if err != nil {
+			return err
+		}
+
+		err = mw.SetImageCompression(imagick.COMPRESSION_JPEG)
+		if err != nil {
+			return err
+		}
+
+		err = mw.SetImageCompressionQuality(15)
+		if err != nil {
+			return err
+		}
+
+		err = mw.SharpenImage(0, 4)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -238,7 +206,7 @@ func magick(mw *imagick.MagickWand, width, height, scale float64) error {
 	return nil
 }
 
-func deepfry(mw *imagick.MagickWand, width, height uint) error {
+func deepfry(mw *imagick.MagickWand, width, height uint, file string) error {
 	orangeOverlay := imagick.NewPixelWand()
 	orangeOverlay.SetColor("#992604")
 	orangeOverlay.SetAlpha(65)
@@ -254,17 +222,17 @@ func deepfry(mw *imagick.MagickWand, width, height uint) error {
 		return err
 	}
 
-	err = jpegify(mw)
-	if err != nil {
-		return err
-	}
-
 	err = mw.ContrastImage(true)
 	if err != nil {
 		return err
 	}
 
 	err = mw.ModulateImage(100, 150, 100)
+	if err != nil {
+		return err
+	}
+
+	err = jpegify(mw, 3, file)
 	if err != nil {
 		return err
 	}
