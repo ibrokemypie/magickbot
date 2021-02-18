@@ -62,6 +62,13 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 		textSplit := strings.Fields(text)
 
 		for k, v := range textSplit {
+			// Mentions are split as "@ mention" by sanitisation, skip them when looking for commands
+			if k > 0 {
+				if textSplit[k-1] == "@" {
+					continue
+				}
+			}
+
 			if v == "help" {
 				PostHelp(mention.Status, selfID, instanceURL, accessToken)
 				return
