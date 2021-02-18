@@ -112,7 +112,9 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 			}
 		case COMPRESS:
 			{
-				if argument < 1 {
+				if argument == 0 {
+					argument = 15
+				} else if argument < 1 {
 					argument = 1
 				} else if argument > 100 {
 					argument = 100

@@ -13,7 +13,7 @@ import (
 func handleMention(mention fedi.Notification, selfID string, instanceURL, accessToken string) {
 	var status fedi.Status
 	var operation magick.MagickCommand
-	var argument = 1
+	var argument = 0
 	var providedMedia = false
 
 	status = mention.Status
@@ -122,8 +122,10 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 
 			content.WriteString("Ran ")
 			content.WriteString(string(operation))
-			content.WriteString(" ")
-			content.WriteString(strconv.Itoa(argument))
+			if argument != 0 {
+				content.WriteString(" ")
+				content.WriteString(strconv.Itoa(argument))
+			}
 			content.WriteString(":")
 
 			// Try to post the manipulated files
