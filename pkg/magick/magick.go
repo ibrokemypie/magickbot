@@ -120,6 +120,11 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 					argument = 100
 				}
 
+				err = mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
+				if err != nil {
+					return (err)
+				}
+
 				err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
 				if err != nil {
 					return (err)
