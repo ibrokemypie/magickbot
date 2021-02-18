@@ -14,14 +14,22 @@ func BotLoop() {
 	instanceURL := viper.GetString("instance.instance_url")
 	accessToken := viper.GetString("instance.access_token")
 
+	self, err := fedi.GetCurrentUser(instanceURL, accessToken)
+	if err != nil {
+		PostError(err, fedi.Status{}, instanceURL, accessToken)
+		return
+	}
+
 	for range time.Tick(time.Second * 5) {
 		mentions := fedi.GetMentions(instanceURL, accessToken)
 
 		for k := range mentions {
 			mention := mentions[len(mentions)-1-k]
-			handleMention(mention, instanceURL, accessToken)
-			viper.Set("last_mention_id", mention.ID)
-			viper.WriteConfig()
+			if mention.Account.ID != self.ID {
+				handleMention(mention, self.ID, instanceURL, accessToken)
+				viper.Set("last_mention_id", mention.ID)
+				viper.WriteConfig()
+			}
 		}
 	}
 }

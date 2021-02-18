@@ -10,19 +10,13 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
-func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
+func handleMention(mention fedi.Notification, selfID string, instanceURL, accessToken string) {
 	var status fedi.Status
 	var operation magick.MagickCommand
 	var argument = 1
 	var providedMedia = false
 
 	status = mention.Status
-
-	self, err := fedi.GetCurrentUser(instanceURL, accessToken)
-	if err != nil {
-		PostError(err, mention.Status, instanceURL, accessToken)
-		return
-	}
 
 	// If mentioning status has no images and reply exists, use reply
 	if (mention.Status.MediaAttachments != nil || len(mention.Status.MediaAttachments) > 0) && mention.Status.ReplyToID != "" {
@@ -39,7 +33,7 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 	} else if len(mention.Status.Mentions) > 1 {
 		// add the profile pics of non self mentioned users as attachments to the status
 		for _, m := range mention.Status.Mentions {
-			if m.ID != self.ID {
+			if m.ID != selfID {
 				user, err := fedi.GetUser(m.ID, instanceURL, accessToken)
 				if err != nil {
 					PostError(err, mention.Status, instanceURL, accessToken)
@@ -67,7 +61,7 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 		for k, v := range textSplit {
 			switch v {
 			case "help":
-				PostHelp(mention.Status, self.ID, instanceURL, accessToken)
+				PostHelp(mention.Status, selfID, instanceURL, accessToken)
 				return
 			case "explode":
 				operation = magick.EXPLODE
@@ -113,7 +107,7 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 
 			content := strings.Builder{}
 			for _, m := range mention.Status.Mentions {
-				if m.ID != self.ID && m.ID != mention.Status.Account.Acct {
+				if m.ID != selfID && m.ID != mention.Status.Account.Acct {
 					content.WriteString("@")
 					content.WriteString(m.Acct)
 					content.WriteString(", ")
