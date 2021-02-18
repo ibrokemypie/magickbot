@@ -29,6 +29,11 @@ func BotLoop() {
 			continue
 		}
 
+		// if there's no mentions left, clean the notifications
+		if len(mentions) == 0 {
+			fedi.ClearNotifications(instanceURL, accessToken)
+		}
+
 		// handle each mention
 		for k := range mentions {
 			mention := mentions[len(mentions)-1-k]
