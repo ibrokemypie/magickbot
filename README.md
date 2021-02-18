@@ -28,7 +28,7 @@ implode [iterations]
 
 magick [scale]
 
-compress [iterations]
+moarjpeg [iterations]
 
 deepfry
 
