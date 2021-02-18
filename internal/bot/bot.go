@@ -14,15 +14,22 @@ func BotLoop() {
 	instanceURL := viper.GetString("instance.instance_url")
 	accessToken := viper.GetString("instance.access_token")
 
-	self, err := fedi.GetCurrentUser(instanceURL, accessToken)
-	if err != nil {
-		PostError(err, fedi.Status{}, instanceURL, accessToken)
-		return
-	}
-
 	for range time.Tick(time.Second * 5) {
-		mentions := fedi.GetMentions(instanceURL, accessToken)
+		// first check the server is still accessible (and get bot's ID)
+		self, err := fedi.GetCurrentUser(instanceURL, accessToken)
+		if err != nil {
+			PostError(err, fedi.Status{}, instanceURL, accessToken)
+			continue
+		}
 
+		// next try to get mention notifications
+		mentions, err := fedi.GetMentions(instanceURL, accessToken)
+		if err != nil {
+			PostError(err, fedi.Status{}, instanceURL, accessToken)
+			continue
+		}
+
+		// handle each mention
 		for k := range mentions {
 			mention := mentions[len(mentions)-1-k]
 			if mention.Account.ID != self.ID {

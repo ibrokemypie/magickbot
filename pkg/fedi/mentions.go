@@ -1,7 +1,6 @@
 package fedi
 
 import (
-	"log"
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
@@ -17,14 +16,14 @@ type Notification struct {
 }
 
 // GetMentions - Get the bots mention notifications
-func GetMentions(instanceURL, accessToken string) []Notification {
+func GetMentions(instanceURL, accessToken string) ([]Notification, error) {
+	mentions := make([]Notification, 0)
+	lastID := viper.GetString("last_mention_id")
+
 	u, err := url.Parse(instanceURL + "/api/v1/notifications")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-
-	lastID := viper.GetString("last_mention_id")
-	mentions := make([]Notification, 0)
 
 	_, err = resty.New().R().
 		SetAuthToken(accessToken).
@@ -35,10 +34,10 @@ func GetMentions(instanceURL, accessToken string) []Notification {
 		SetResult(&mentions).
 		Get(u.String())
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
-	return mentions
+	return mentions, nil
 }
 
 // ClearNotifications - Clear all notifications
