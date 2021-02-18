@@ -114,7 +114,7 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 
 			content := strings.Builder{}
 			for _, m := range mention.Status.Mentions {
-				if m.ID != self.ID {
+				if m.ID != self.ID && m.ID != mention.Status.Account.Acct {
 					content.WriteString("@")
 					content.WriteString(m.Acct)
 					content.WriteString(", ")
