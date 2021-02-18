@@ -2,19 +2,22 @@ package bot
 
 import (
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 
 	"github.com/ibrokemypie/magickbot/pkg/fedi"
 	"github.com/ibrokemypie/magickbot/pkg/magick"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/spf13/viper"
 )
 
 func handleMention(mention fedi.Notification, selfID string, instanceURL, accessToken string) {
 	var status fedi.Status
-	var operation magick.MagickCommand
+	var operation string
 	var argument = 0
 	var providedMedia = false
+	var maxIterations = viper.GetInt("max_iterations")
 
 	status = mention.Status
 
@@ -57,85 +60,87 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 
 		textSplit := strings.Split(text, " ")
 
-	Loop:
 		for k, v := range textSplit {
-			switch v {
-			case "help":
+			if v == "help" {
 				PostHelp(mention.Status, selfID, instanceURL, accessToken)
 				return
-			case magick.EXPLODE:
-				operation = magick.EXPLODE
-			case magick.IMPLODE:
-				operation = magick.IMPLODE
-			case magick.MAGICK:
-				operation = magick.MAGICK
-			case magick.COMPRESS:
-				operation = magick.COMPRESS
-			default:
-				continue
+			}
+
+			for _, command := range magick.MagickCommands {
+				if v == command {
+					operation = v
+					break
+				}
+			}
+
+			// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
+			if len(textSplit) > k+1 {
+				j, err := strconv.Atoi(textSplit[k+1])
+				if err == nil {
+					argument = j
+				}
+			}
+
+			if v == "random" {
+				operation = magick.MagickCommands[rand.Intn(len(magick.MagickCommands))]
+				if argument == 0 {
+					argument = rand.Intn(maxIterations) + 1
+				}
 			}
 
 			if operation != "" {
-				// If the next text is a number, and number is between 1 and 15 inclusive, run this many iterations of command
-				if len(textSplit) > k+1 {
-					j, err := strconv.Atoi(textSplit[k+1])
-					if err == nil {
-						argument = j
-					}
-				}
-
-				// If there was an attachment in the mention or the status it replied to, use that, otherwise apply operation to the avatar
-				if providedMedia {
-					// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
-					for _, attachment := range status.MediaAttachments {
-						files = append(files, fedi.GetMedia(attachment.URL, accessToken))
-					}
-				} else {
-					files = append(files, fedi.GetMedia(status.Account.Avatar, accessToken))
-				}
+				break
 			}
+		}
 
-			// Try to run the magick operation on the files
-			err := magick.RunMagick(operation, files, argument)
-			// retry once
-			if err != nil {
-				log.Println(err)
-				err = magick.RunMagick(operation, files, argument)
-				if err != nil {
-					PostError(err, mention.Status, instanceURL, accessToken)
-					return
-				}
+		// If there was an attachment in the mention or the status it replied to, use that, otherwise apply operation to the avatar
+		if providedMedia {
+			// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
+			for _, attachment := range status.MediaAttachments {
+				files = append(files, fedi.GetMedia(attachment.URL, accessToken))
 			}
+		} else {
+			files = append(files, fedi.GetMedia(status.Account.Avatar, accessToken))
+		}
 
-			content := strings.Builder{}
-			for _, m := range mention.Status.Mentions {
-				if m.ID != selfID && m.ID != mention.Status.Account.Acct {
-					content.WriteString("@")
-					content.WriteString(m.Acct)
-					content.WriteString(", ")
-				}
-			}
-
-			content.WriteString("@")
-			content.WriteString(mention.Status.Account.Acct)
-			content.WriteString("\n")
-
-			content.WriteString("Ran ")
-			content.WriteString(string(operation))
-			if argument != 0 {
-				content.WriteString(" ")
-				content.WriteString(strconv.Itoa(argument))
-			}
-			content.WriteString(":")
-
-			// Try to post the manipulated files
-			err = fedi.PostMedia(content.String(), files, mention.Status, instanceURL, accessToken)
+		// Try to run the magick operation on the files
+		argument, err := magick.RunMagick(operation, files, argument)
+		// retry once
+		if err != nil {
+			log.Println(err)
+			argument, err = magick.RunMagick(operation, files, argument)
 			if err != nil {
 				PostError(err, mention.Status, instanceURL, accessToken)
 				return
 			}
+		}
 
-			break Loop
+		content := strings.Builder{}
+		for _, m := range mention.Status.Mentions {
+			if m.ID != selfID && m.ID != mention.Status.Account.Acct {
+				content.WriteString("@")
+				content.WriteString(m.Acct)
+				content.WriteString(", ")
+			}
+		}
+
+		content.WriteString("@")
+		content.WriteString(mention.Status.Account.Acct)
+		content.WriteString("\n")
+
+		content.WriteString("Ran ")
+		content.WriteString(string(operation))
+		if argument != -1 {
+			content.WriteString(" ")
+			content.WriteString(strconv.Itoa(argument))
+		}
+		content.WriteString(":")
+
+		// Try to post the manipulated files
+		err = fedi.PostMedia(content.String(), files, mention.Status, instanceURL, accessToken)
+		if err != nil {
+			PostError(err, mention.Status, instanceURL, accessToken)
+			return
 		}
 	}
 }

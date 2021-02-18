@@ -12,16 +12,14 @@ import (
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
-type MagickCommand string
+var MagickCommands = []string{
+	"explode",
+	"implode",
+	"magick",
+	"compress",
+}
 
-const (
-	EXPLODE  = "explode"
-	IMPLODE  = "implode"
-	MAGICK   = "magick"
-	COMPRESS = "compress"
-)
-
-func RunMagick(command MagickCommand, files []string, argument int) error {
+func RunMagick(command string, files []string, argument int) (int, error) {
 	imagick.Initialize()
 	defer imagick.Terminate()
 
@@ -36,14 +34,14 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 	for k, file := range files {
 		err := mw.ReadImage(file)
 		if err != nil {
-			return (err)
+			return -1, err
 		}
 
 		height := mw.GetImageHeight()
 		width := mw.GetImageWidth()
 
 		if height*width > maxInputPixels {
-			return (errors.New("Input too large! Maximum pixels: " + strconv.Itoa(int(maxInputPixels))))
+			return -1, errors.New("Input too large! Maximum pixels: " + strconv.Itoa(int(maxInputPixels)))
 		}
 
 		// If the image has more than maxPixels pixels, resize it down to fit. This is to reduce the maximum utilisation from a single operation.
@@ -55,7 +53,7 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 
 			mw.ResizeImage(uint(newWidth), uint(newWidth), imagick.FILTER_UNDEFINED)
 			if err != nil {
-				return (err)
+				return -1, err
 			}
 
 			height = mw.GetImageHeight()
@@ -63,7 +61,7 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 		}
 
 		switch command {
-		case EXPLODE:
+		case "explode":
 			{
 				if argument < 1 {
 					argument = 1
@@ -74,11 +72,11 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 				for i := 0; i < argument; i++ {
 					err = mw.ImplodeImage(-.5, imagick.INTERPOLATE_PIXEL_UNDEFINED)
 					if err != nil {
-						return (err)
+						return -1, err
 					}
 				}
 			}
-		case IMPLODE:
+		case "implode":
 			{
 				if argument < 1 {
 					argument = 1
@@ -89,11 +87,11 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 				for i := 0; i < argument; i++ {
 					err = mw.ImplodeImage(.5, imagick.INTERPOLATE_PIXEL_UNDEFINED)
 					if err != nil {
-						return (err)
+						return -1, err
 					}
 				}
 			}
-		case MAGICK:
+		case "magick":
 			{
 				if argument < 1 {
 					argument = 1
@@ -103,14 +101,14 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 
 				err = mw.LiquidRescaleImage(uint(width/2), uint(height/2), 1*float64(argument), 0)
 				if err != nil {
-					return (err)
+					return -1, err
 				}
 				err = mw.LiquidRescaleImage(uint(float32(width)*1.5), uint(float32(height)*1.5), 2*float64(argument), 0)
 				if err != nil {
-					return (err)
+					return -1, err
 				}
 			}
-		case COMPRESS:
+		case "compress":
 			{
 				if argument < 1 {
 					argument = 1
@@ -124,45 +122,45 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 					if i > 1 {
 						err = mw.WriteImage(file)
 						if err != nil {
-							return (err)
+							return -1, err
 						}
 
 						err := mw.ReadImage(file)
 						if err != nil {
-							return (err)
+							return -1, err
 						}
 					}
 
 					err = mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
 					if err != nil {
-						return (err)
+						return -1, err
 					}
 
 					err = mw.SetImageInterlaceScheme(imagick.INTERLACE_JPEG)
 					if err != nil {
-						return (err)
+						return -1, err
 					}
 
 					err = mw.SetImageCompression(imagick.COMPRESSION_JPEG)
 					if err != nil {
-						return (err)
+						return -1, err
 					}
 
 					err = mw.SetImageCompressionQuality(15)
 					if err != nil {
-						return (err)
+						return -1, err
 					}
 
 					err = mw.SharpenImage(0, 4)
 					if err != nil {
-						return (err)
+						return -1, err
 					}
 
 				}
 			}
 		default:
 			{
-				return errors.New("Unsupported command")
+				return -1, errors.New("Unsupported command")
 			}
 		}
 
@@ -171,9 +169,9 @@ func RunMagick(command MagickCommand, files []string, argument int) error {
 
 		err = mw.WriteImage(outputFile)
 		if err != nil {
-			return (err)
+			return -1, err
 		}
 	}
 
-	return nil
+	return argument, nil
 }

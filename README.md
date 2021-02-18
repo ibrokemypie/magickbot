@@ -30,6 +30,8 @@ magick [scale]
 
 compress [iterations]
 
+random [argument]
+
 ### Sample config
 
 `$HOME/.config/magickbot/config.yaml:`
