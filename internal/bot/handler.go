@@ -73,8 +73,8 @@ func handleMention(mention fedi.Notification, instanceURL, accessToken string) {
 				operation = magick.EXPLODE
 			case "implode":
 				operation = magick.IMPLODE
-			case "magik":
-				operation = magick.MAGIK
+			case "magick":
+				operation = magick.MAGICK
 			default:
 				continue
 			}
