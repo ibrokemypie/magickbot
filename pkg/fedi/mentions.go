@@ -16,7 +16,7 @@ type Notification struct {
 	Status  Status  `json:"status"`
 }
 
-// GetMentions -
+// GetMentions - Get the bots mention notifications
 func GetMentions(instanceURL, accessToken string) []Notification {
 	u, err := url.Parse(instanceURL + "/api/v1/notifications")
 	if err != nil {
@@ -39,4 +39,21 @@ func GetMentions(instanceURL, accessToken string) []Notification {
 	}
 
 	return mentions
+}
+
+// ClearNotifications - Clear all notifications
+func ClearNotifications(instanceURL, accessToken string) error {
+	u, err := url.Parse(instanceURL + "/api/v1/notifications/clear")
+	if err != nil {
+		return err
+	}
+
+	_, err = resty.New().R().
+		SetAuthToken(accessToken).
+		Get(u.String())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
