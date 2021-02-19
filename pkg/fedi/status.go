@@ -34,7 +34,7 @@ func GetStatus(id, instanceURL, accessToken string) (Status, error) {
 		SetResult(&result).
 		Get(url.String())
 	if err != nil {
-		panic(err)
+		return Status{}, err
 	}
 
 	return result, nil
@@ -44,7 +44,7 @@ func GetStatus(id, instanceURL, accessToken string) (Status, error) {
 func PostStatus(contents string, reply Status, instanceURL, accessToken string) error {
 	u, err := url.Parse(instanceURL + "/api/v1/statuses")
 	if err != nil {
-		return (err)
+		return err
 	}
 
 	_, err = resty.New().R().
@@ -57,7 +57,7 @@ func PostStatus(contents string, reply Status, instanceURL, accessToken string) 
 		}).
 		Post(u.String())
 	if err != nil {
-		return (err)
+		return err
 	}
 
 	return nil

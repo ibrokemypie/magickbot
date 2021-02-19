@@ -29,7 +29,7 @@ func GetUser(id, instanceURL, accessToken string) (Account, error) {
 		SetResult(&result).
 		Get(url.String())
 	if err != nil {
-		panic(err)
+		return Account{}, err
 	}
 
 	return result, nil
@@ -49,7 +49,7 @@ func GetCurrentUser(instanceURL, accessToken string) (Account, error) {
 		SetResult(&result).
 		Get(url.String())
 	if err != nil {
-		panic(err)
+		return Account{}, err
 	}
 
 	return result, nil

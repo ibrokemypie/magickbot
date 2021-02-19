@@ -105,10 +105,16 @@ func handleMention(mention fedi.Notification, selfID string, instanceURL, access
 			if providedMedia {
 				// For each attached media, download it and add to files list, then run the command on the files list, finally posting the files in a reply
 				for _, attachment := range status.MediaAttachments {
-					files = append(files, fedi.GetMedia(attachment.URL, accessToken))
+					newFile, err := fedi.GetMedia(attachment.URL, accessToken)
+					if err == nil {
+						files = append(files, newFile)
+					}
 				}
 			} else {
-				files = append(files, fedi.GetMedia(status.Account.Avatar, accessToken))
+				newFile, err := fedi.GetMedia(status.Account.Avatar, accessToken)
+				if err == nil {
+					files = append(files, newFile)
+				}
 			}
 
 			// Try to run the magick operation on the files

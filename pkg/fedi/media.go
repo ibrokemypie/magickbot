@@ -19,7 +19,7 @@ type Attachment struct {
 }
 
 // GetMedia - Download media to tmp from url
-func GetMedia(mediaURL string, accessToken string) string {
+func GetMedia(mediaURL string, accessToken string) (string, error) {
 	filename := "/tmp/" + path.Base(mediaURL)
 
 	_, err := resty.New().R().
@@ -27,10 +27,10 @@ func GetMedia(mediaURL string, accessToken string) string {
 		SetOutput(filename).
 		Get(mediaURL)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return filename
+	return filename, nil
 }
 
 // PostMedia - Upload files and create a new status
@@ -41,7 +41,7 @@ func PostMedia(content string, files []string, reply Status, instanceURL, access
 	for _, file := range files {
 		u, err := url.Parse(instanceURL + "/api/v1/media")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		var result Attachment
@@ -52,7 +52,7 @@ func PostMedia(content string, files []string, reply Status, instanceURL, access
 			SetResult(&result).
 			Post(u.String())
 		if err != nil {
-			return (err)
+			return err
 		}
 
 		mediaIDs = append(mediaIDs, result.ID)
@@ -61,7 +61,7 @@ func PostMedia(content string, files []string, reply Status, instanceURL, access
 	if len(mediaIDs) > 0 {
 		u, err := url.Parse(instanceURL + "/api/v1/statuses")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		_, err = resty.New().R().
