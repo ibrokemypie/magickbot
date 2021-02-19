@@ -4,7 +4,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
@@ -59,23 +58,9 @@ func PostMedia(content string, files []string, reply Status, instanceURL, access
 	}
 
 	if len(mediaIDs) > 0 {
-		u, err := url.Parse(instanceURL + "/api/v1/statuses")
+		err := PostStatus(content, mediaIDs, reply, instanceURL, accessToken)
 		if err != nil {
 			return err
-		}
-
-		_, err = resty.New().R().
-			SetAuthToken(accessToken).
-			SetFormDataFromValues(url.Values{
-				"status":         []string{content},
-				"in_reply_to_id": []string{reply.ID},
-				"visibility":     []string{reply.Visibility},
-				"sensitive":      []string{strconv.FormatBool(reply.Sensitive)},
-				"media_ids[]":    mediaIDs,
-			}).
-			Post(u.String())
-		if err != nil {
-			return (err)
 		}
 
 		for _, file := range files {

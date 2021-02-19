@@ -51,7 +51,7 @@ func BotLoop() {
 // PostError - Helper function to post errors to fedi
 func PostError(err error, reply fedi.Status, instanceURL, accessToken string) {
 	log.Println(err)
-	err = fedi.PostStatus("Magickbot error: "+err.Error(), reply, instanceURL, accessToken)
+	err = fedi.PostStatus("Magickbot error: "+err.Error(), nil, reply, instanceURL, accessToken)
 	if err != nil {
 		log.Println(err)
 	}
@@ -94,7 +94,7 @@ func PostHelp(reply fedi.Status, selfID string, instanceURL, accessToken string)
 	content.WriteString("\nMax output pixels: ")
 	content.WriteString(strconv.Itoa(viper.GetInt("max_pixels_out")))
 
-	err := fedi.PostStatus(content.String(), reply, instanceURL, accessToken)
+	err := fedi.PostStatus(content.String(), nil, reply, instanceURL, accessToken)
 	if err != nil {
 		PostError(err, reply, instanceURL, accessToken)
 	}

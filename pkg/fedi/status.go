@@ -41,7 +41,7 @@ func GetStatus(id, instanceURL, accessToken string) (Status, error) {
 }
 
 // PostStatus - Posts a text status
-func PostStatus(contents string, reply Status, instanceURL, accessToken string) error {
+func PostStatus(contents string, mediaIDs []string, reply Status, instanceURL, accessToken string) error {
 	u, err := url.Parse(instanceURL + "/api/v1/statuses")
 	if err != nil {
 		return err
@@ -49,11 +49,12 @@ func PostStatus(contents string, reply Status, instanceURL, accessToken string) 
 
 	_, err = resty.New().R().
 		SetAuthToken(accessToken).
-		SetFormData(map[string]string{
-			"in_reply_to_id": reply.ID,
-			"status":         contents,
-			"visibility":     reply.Visibility,
-			"sensitive":      strconv.FormatBool(reply.Sensitive),
+		SetFormDataFromValues(url.Values{
+			"in_reply_to_id": []string{reply.ID},
+			"status":         []string{contents},
+			"visibility":     []string{reply.Visibility},
+			"sensitive":      []string{strconv.FormatBool(reply.Sensitive)},
+			"media_ids[]":    mediaIDs,
 		}).
 		Post(u.String())
 	if err != nil {
