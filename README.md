@@ -42,6 +42,7 @@ random [argument]
 instance:
     instance_url: https://mastodon.social;
     access_token: xxxxxxxxxxxxxxxxxxxxxxx
+    max_visibility: unlisted
 
 last_mention_id: xxxxxx
 max_pixels_in: 9000000

@@ -3,9 +3,18 @@ package fedi
 import (
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/spf13/viper"
 )
+
+var visibilites = map[string]int{
+	"direct":   0,
+	"private":  1,
+	"unlisted": 2,
+	"public":   3,
+}
 
 // Status - Mastodon status object
 type Status struct {
@@ -47,12 +56,17 @@ func PostStatus(contents string, mediaIDs []string, reply Status, instanceURL, a
 		return err
 	}
 
+	visibility := strings.ToLower(viper.GetString("instance.max_visibility"))
+	if visibilites[reply.Visibility] < visibilites[visibility] {
+		visibility = reply.Visibility
+	}
+
 	_, err = resty.New().R().
 		SetAuthToken(accessToken).
 		SetFormDataFromValues(url.Values{
 			"in_reply_to_id": []string{reply.ID},
 			"status":         []string{contents},
-			"visibility":     []string{reply.Visibility},
+			"visibility":     []string{visibility},
 			"sensitive":      []string{strconv.FormatBool(reply.Sensitive)},
 			"media_ids[]":    mediaIDs,
 		}).

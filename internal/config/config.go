@@ -18,6 +18,7 @@ func LoadConfig() {
 	viper.SetDefault("max_pixels_in", 9000000)
 	viper.SetDefault("max_pixels_out", 640000)
 	viper.SetDefault("max_iterations", 15)
+	viper.SetDefault("instance.max_visibility", "unlisted")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
