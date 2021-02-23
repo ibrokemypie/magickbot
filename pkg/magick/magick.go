@@ -5,9 +5,7 @@ import (
 	"math"
 	"os"
 	"path"
-	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/spf13/viper"
 	"gopkg.in/gographics/imagick.v3/imagick"
@@ -150,22 +148,11 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 }
 
 func jpegify(mw *imagick.MagickWand, iterations int) error {
-	file := mw.GetImageFilename()
-	outputFile := strings.TrimSuffix(file, filepath.Ext(file)) + ".jpg"
-
 	for i := 0; i < iterations; i++ {
 		if i > 1 {
-			err := mw.WriteImage(outputFile)
-			if err != nil {
-				return err
-			}
+			blob := mw.GetImageBlob()
 
-			err = mw.ReadImage(outputFile)
-			if err != nil {
-				return err
-			}
-
-			err = os.Remove(outputFile)
+			err := mw.ReadImageBlob(blob)
 			if err != nil {
 				return err
 			}
