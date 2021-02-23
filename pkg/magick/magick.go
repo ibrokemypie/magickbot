@@ -3,6 +3,7 @@ package magick
 import (
 	"errors"
 	"math"
+	"os"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -39,6 +40,13 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 		if err != nil {
 			return -1, err
 		}
+
+		err = os.Remove(file)
+		if err != nil {
+			return -1, err
+		}
+
+		outputFile := "/tmp/out." + path.Base(file)
 
 		height := mw.GetImageHeight()
 		width := mw.GetImageWidth()
@@ -112,12 +120,12 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 					argument = maxIterations
 				}
 
-				jpegify(mw, argument, file)
+				jpegify(mw, argument)
 
 			}
 		case "deepfry":
 			{
-				err = deepfry(mw, width, height, file)
+				err = deepfry(mw, width, height)
 				if err != nil {
 					return -1, err
 				}
@@ -130,7 +138,6 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 			}
 		}
 
-		outputFile := "/tmp/out." + path.Base(file)
 		files[k] = outputFile
 
 		err = mw.WriteImage(outputFile)
@@ -142,20 +149,27 @@ func RunMagick(command string, files []string, argument int) (int, error) {
 	return argument, nil
 }
 
-func jpegify(mw *imagick.MagickWand, iterations int, file string) error {
-	file = strings.TrimSuffix(file, filepath.Ext(file)) + ".jpg"
+func jpegify(mw *imagick.MagickWand, iterations int) error {
+	file := mw.GetImageFilename()
+	outputFile := strings.TrimSuffix(file, filepath.Ext(file)) + ".jpg"
 
 	for i := 0; i < iterations; i++ {
 		if i > 1 {
-			err := mw.WriteImage(file)
+			err := mw.WriteImage(outputFile)
 			if err != nil {
 				return err
 			}
 
-			err = mw.ReadImage(file)
+			err = mw.ReadImage(outputFile)
 			if err != nil {
 				return err
 			}
+
+			err = os.Remove(outputFile)
+			if err != nil {
+				return err
+			}
+
 		}
 
 		err := mw.SetImageAlphaChannel(imagick.ALPHA_CHANNEL_OPAQUE)
@@ -208,7 +222,7 @@ func magick(mw *imagick.MagickWand, width, height, scale float64) error {
 	return nil
 }
 
-func deepfry(mw *imagick.MagickWand, width, height uint, file string) error {
+func deepfry(mw *imagick.MagickWand, width, height uint) error {
 	orangeOverlay := imagick.NewPixelWand()
 	orangeOverlay.SetColor("#992604")
 	orangeOverlay.SetAlpha(65)
@@ -234,7 +248,7 @@ func deepfry(mw *imagick.MagickWand, width, height uint, file string) error {
 		return err
 	}
 
-	err = jpegify(mw, 3, file)
+	err = jpegify(mw, 3)
 	if err != nil {
 		return err
 	}
