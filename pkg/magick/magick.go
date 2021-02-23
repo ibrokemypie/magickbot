@@ -17,7 +17,7 @@ var MagickCommands = []string{
 	"explode",
 	"implode",
 	"magick",
-	"kagik",
+	"magik",
 	"moarjpeg",
 	"compress",
 	"deepfry",
